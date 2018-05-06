@@ -17,6 +17,7 @@
 		30FA923C209D35DF0042482B /* PixelPointView.mm in Sources */ = {isa = PBXBuildFile; fileRef = 30FA923B209D35DF0042482B /* PixelPointView.mm */; };
 		30FA923F209D4E8D0042482B /* PixelPointRenderer.mm in Sources */ = {isa = PBXBuildFile; fileRef = 30FA923E209D4E8D0042482B /* PixelPointRenderer.mm */; };
 		30FA924A209E9E990042482B /* libSOIL.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 30FA9249209E9E990042482B /* libSOIL.dylib */; };
+		30FA924C209F54A30042482B /* img.png in Resources */ = {isa = PBXBuildFile; fileRef = 30FA924B209F50600042482B /* img.png */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -58,6 +59,7 @@
 		30FA923D209D4E8D0042482B /* PixelPointRenderer.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = PixelPointRenderer.h; sourceTree = "<group>"; };
 		30FA923E209D4E8D0042482B /* PixelPointRenderer.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = PixelPointRenderer.mm; sourceTree = "<group>"; };
 		30FA9249209E9E990042482B /* libSOIL.dylib */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libSOIL.dylib; path = SOIL/lib/libSOIL.dylib; sourceTree = "<group>"; };
+		30FA924B209F50600042482B /* img.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = img.png; sourceTree = SOURCE_ROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -148,6 +150,7 @@
 		30FA9243209E95390042482B /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				30FA924B209F50600042482B /* img.png */,
 				30FA9249209E9E990042482B /* libSOIL.dylib */,
 			);
 			name = Frameworks;
@@ -259,6 +262,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				30FA924C209F54A30042482B /* img.png in Resources */,
 				30FA920F209D34300042482B /* Assets.xcassets in Resources */,
 				30FA9212209D34300042482B /* Main.storyboard in Resources */,
 			);

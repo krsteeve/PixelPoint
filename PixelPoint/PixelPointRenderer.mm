@@ -6,6 +6,8 @@
 //  Copyright © 2018 Kelsey Steeves. All rights reserved.
 //
 
+#import <AppKit/AppKit.h>
+
 #import "PixelPointRenderer.h"
 #import <OpenGL/OpenGL.h>
 #include <OpenGL/gl3.h>
@@ -19,12 +21,13 @@ const GLchar* vertexSource = R"glsl(
 #version 150 core
 in vec2 position;
 in vec3 color;
-
+in vec2 texcoord;
 out vec3 Color;
-
+out vec2 Texcoord;
 void main()
 {
     Color = color;
+    Texcoord = texcoord;
     gl_Position = vec4(position, 0.0, 1.0);
 }
 )glsl";
@@ -32,10 +35,12 @@ void main()
 const GLchar* fragmentSource = R"glsl(
 #version 150 core
 in vec3 Color;
+in vec2 Texcoord;
 out vec4 outColor;
+uniform sampler2D tex;
 void main()
 {
-    outColor = vec4(Color, 1.0);
+    outColor = texture(tex, Texcoord) * vec4(Color, 1.0);
 }
 )glsl";
 
@@ -46,19 +51,18 @@ void main()
         // Create Vertex Array Object
         GLuint vao;
         glGenVertexArrays(1, &vao);
-        
         glBindVertexArray(vao);
-        
         
         // Create a Vertex Buffer Object and copy the vertex data to it
         GLuint vbo;
         glGenBuffers(1, &vbo);
         
-        float vertices[] = {
-            -0.5f,  0.5f, 1.0f, 0.0f, 0.0f, // Top-left
-            0.5f,  0.5f, 0.0f, 1.0f, 0.0f, // Top-right
-            0.5f, -0.5f, 0.0f, 0.0f, 1.0f, // Bottom-right
-            -0.5f, -0.5f, 1.0f, 1.0f, 1.0f  // Bottom-left
+        GLfloat vertices[] = {
+            // Position (2)    Color (3)   Texcoords (2)
+            -0.5f,  0.5f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, // Top-left
+            0.5f,  0.5f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f, // Top-right
+            0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f, // Bottom-right
+            -0.5f, -0.5f, 1.0f, 1.0f, 1.0f, 0.0f, 1.0f  // Bottom-left
         };
         
         glBindBuffer(GL_ARRAY_BUFFER, vbo);
@@ -97,17 +101,31 @@ void main()
         // Specify the layout of the vertex data
         GLint posAttrib = glGetAttribLocation(shaderProgram, "position");
         glEnableVertexAttribArray(posAttrib);
-        glVertexAttribPointer(posAttrib, 2, GL_FLOAT, GL_FALSE, 5*sizeof(float), 0);
+        glVertexAttribPointer(posAttrib, 2, GL_FLOAT, GL_FALSE, 7 * sizeof(GLfloat), 0);
         
         GLint colAttrib = glGetAttribLocation(shaderProgram, "color");
         glEnableVertexAttribArray(colAttrib);
-        glVertexAttribPointer(colAttrib, 3, GL_FLOAT, GL_FALSE, 5*sizeof(float), (void*)(2*sizeof(float)));
+        glVertexAttribPointer(colAttrib, 3, GL_FLOAT, GL_FALSE, 7 * sizeof(GLfloat), (void*)(2 * sizeof(GLfloat)));
         
-        int width = 0, height = 0;
-        unsigned char* image = SOIL_load_image("img.png", &width, &height, 0, SOIL_LOAD_RGB);
+        GLint texAttrib = glGetAttribLocation(shaderProgram, "texcoord");
+        glEnableVertexAttribArray(texAttrib);
+        glVertexAttribPointer(texAttrib, 2, GL_FLOAT, GL_FALSE, 7 * sizeof(GLfloat), (void*)(5 * sizeof(GLfloat)));
+        
+        // Load texture
+        GLuint tex;
+        glGenTextures(1, &tex);
+        glBindTexture(GL_TEXTURE_2D, tex);
+        
+        int width, height;
+        NSString *filePath = [[NSBundle mainBundle] pathForResource:@"img" ofType:@"png"];
+        unsigned char* image = SOIL_load_image([filePath UTF8String], &width, &height, 0, SOIL_LOAD_RGB);
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, image);
-        
         SOIL_free_image_data(image);
+        
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     }
     
     return self;
