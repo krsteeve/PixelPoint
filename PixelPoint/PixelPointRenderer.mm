@@ -10,6 +10,8 @@
 #import <OpenGL/OpenGL.h>
 #include <OpenGL/gl3.h>
 
+#include "SOIL.h"
+
 @implementation PixelPointRenderer
 
 // Shader sources
@@ -100,6 +102,12 @@ void main()
         GLint colAttrib = glGetAttribLocation(shaderProgram, "color");
         glEnableVertexAttribArray(colAttrib);
         glVertexAttribPointer(colAttrib, 3, GL_FLOAT, GL_FALSE, 5*sizeof(float), (void*)(2*sizeof(float)));
+        
+        int width = 0, height = 0;
+        unsigned char* image = SOIL_load_image("img.png", &width, &height, 0, SOIL_LOAD_RGB);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, image);
+        
+        SOIL_free_image_data(image);
     }
     
     return self;

@@ -4,7 +4,7 @@
 # For 'make install' to work, set LOCAL according to your system configuration
 LOCAL = /usr/local
 
-LIB = libSOIL.a
+LIB = libSOIL.dylib
 INC = SOIL.h
 
 SRCDIR = ../../src
@@ -12,8 +12,9 @@ LIBDIR = ../../lib
 INCDIR = ../../src
 OBJDIR = obj
 
-CXX = gcc
-CXXFLAGS = -O2 -s -Wall
+CXX = g++
+CXXFLAGS = -O2 -s -Wall -arch x86_64 -std=gnu++98
+LDFLAGS = -shared
 DELETER = rm -f
 COPIER = cp
 

@@ -16,6 +16,7 @@
 		30FA922B209D34310042482B /* PixelPointUITests.m in Sources */ = {isa = PBXBuildFile; fileRef = 30FA922A209D34310042482B /* PixelPointUITests.m */; };
 		30FA923C209D35DF0042482B /* PixelPointView.mm in Sources */ = {isa = PBXBuildFile; fileRef = 30FA923B209D35DF0042482B /* PixelPointView.mm */; };
 		30FA923F209D4E8D0042482B /* PixelPointRenderer.mm in Sources */ = {isa = PBXBuildFile; fileRef = 30FA923E209D4E8D0042482B /* PixelPointRenderer.mm */; };
+		30FA924A209E9E990042482B /* libSOIL.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 30FA9249209E9E990042482B /* libSOIL.dylib */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -56,6 +57,7 @@
 		30FA923B209D35DF0042482B /* PixelPointView.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = PixelPointView.mm; sourceTree = "<group>"; };
 		30FA923D209D4E8D0042482B /* PixelPointRenderer.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = PixelPointRenderer.h; sourceTree = "<group>"; };
 		30FA923E209D4E8D0042482B /* PixelPointRenderer.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = PixelPointRenderer.mm; sourceTree = "<group>"; };
+		30FA9249209E9E990042482B /* libSOIL.dylib */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libSOIL.dylib; path = SOIL/lib/libSOIL.dylib; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -63,6 +65,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				30FA924A209E9E990042482B /* libSOIL.dylib in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -90,6 +93,7 @@
 				30FA921E209D34300042482B /* PixelPointTests */,
 				30FA9229209D34300042482B /* PixelPointUITests */,
 				30FA9206209D34300042482B /* Products */,
+				30FA9243209E95390042482B /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -139,6 +143,14 @@
 				30FA922C209D34310042482B /* Info.plist */,
 			);
 			path = PixelPointUITests;
+			sourceTree = "<group>";
+		};
+		30FA9243209E95390042482B /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				30FA9249209E9E990042482B /* libSOIL.dylib */,
+			);
+			name = Frameworks;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -434,8 +446,13 @@
 				CODE_SIGN_ENTITLEMENTS = PixelPoint/PixelPoint.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
+				HEADER_SEARCH_PATHS = SOIL/src/;
 				INFOPLIST_FILE = PixelPoint/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)/SOIL/lib",
+				);
 				PRODUCT_BUNDLE_IDENTIFIER = ReducedStyle.PixelPoint;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
@@ -448,8 +465,13 @@
 				CODE_SIGN_ENTITLEMENTS = PixelPoint/PixelPoint.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
+				HEADER_SEARCH_PATHS = SOIL/src/;
 				INFOPLIST_FILE = PixelPoint/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)/SOIL/lib",
+				);
 				PRODUCT_BUNDLE_IDENTIFIER = ReducedStyle.PixelPoint;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
