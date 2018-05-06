@@ -15,7 +15,7 @@
 		30FA9220209D34300042482B /* PixelPointTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 30FA921F209D34300042482B /* PixelPointTests.m */; };
 		30FA922B209D34310042482B /* PixelPointUITests.m in Sources */ = {isa = PBXBuildFile; fileRef = 30FA922A209D34310042482B /* PixelPointUITests.m */; };
 		30FA923C209D35DF0042482B /* PixelPointView.mm in Sources */ = {isa = PBXBuildFile; fileRef = 30FA923B209D35DF0042482B /* PixelPointView.mm */; };
-		30FA923F209D4E8D0042482B /* PixelPointRenderer.m in Sources */ = {isa = PBXBuildFile; fileRef = 30FA923E209D4E8D0042482B /* PixelPointRenderer.m */; };
+		30FA923F209D4E8D0042482B /* PixelPointRenderer.mm in Sources */ = {isa = PBXBuildFile; fileRef = 30FA923E209D4E8D0042482B /* PixelPointRenderer.mm */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -55,7 +55,7 @@
 		30FA923A209D35DF0042482B /* PixelPointView.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = PixelPointView.h; sourceTree = "<group>"; };
 		30FA923B209D35DF0042482B /* PixelPointView.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = PixelPointView.mm; sourceTree = "<group>"; };
 		30FA923D209D4E8D0042482B /* PixelPointRenderer.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = PixelPointRenderer.h; sourceTree = "<group>"; };
-		30FA923E209D4E8D0042482B /* PixelPointRenderer.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = PixelPointRenderer.m; sourceTree = "<group>"; };
+		30FA923E209D4E8D0042482B /* PixelPointRenderer.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = PixelPointRenderer.mm; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -115,7 +115,7 @@
 				30FA923A209D35DF0042482B /* PixelPointView.h */,
 				30FA923B209D35DF0042482B /* PixelPointView.mm */,
 				30FA923D209D4E8D0042482B /* PixelPointRenderer.h */,
-				30FA923E209D4E8D0042482B /* PixelPointRenderer.m */,
+				30FA923E209D4E8D0042482B /* PixelPointRenderer.mm */,
 				30FA9213209D34300042482B /* Info.plist */,
 				30FA9214209D34300042482B /* main.m */,
 				30FA9216209D34300042482B /* PixelPoint.entitlements */,
@@ -275,7 +275,7 @@
 			files = (
 				30FA920D209D34300042482B /* ViewController.m in Sources */,
 				30FA9215209D34300042482B /* main.m in Sources */,
-				30FA923F209D4E8D0042482B /* PixelPointRenderer.m in Sources */,
+				30FA923F209D4E8D0042482B /* PixelPointRenderer.mm in Sources */,
 				30FA923C209D35DF0042482B /* PixelPointView.mm in Sources */,
 				30FA920A209D34300042482B /* AppDelegate.m in Sources */,
 			);

@@ -10,4 +10,8 @@
 
 @interface PixelPointRenderer : NSObject
 
+- (instancetype) init;
+- (void) render;
+- (void) dealloc;
+
 @end
