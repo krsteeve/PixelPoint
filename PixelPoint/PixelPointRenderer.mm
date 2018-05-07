@@ -11,6 +11,7 @@
 #import "PixelPointRenderer.h"
 #import <OpenGL/OpenGL.h>
 #include <OpenGL/gl3.h>
+#include <vector>
 
 #include "SOIL.h"
 
@@ -44,6 +45,61 @@ void main()
 }
 )glsl";
 
+static const int COMPONENTS_PER_VERTEX = 7;
+
+std::vector<GLfloat> tile (int width, int height) {
+    std::vector<GLfloat> vertices;
+    vertices.reserve(width * height * COMPONENTS_PER_VERTEX * 4);
+    
+    float elementWidth = 2.0f / width;
+    float elementHeight = 2.0f / height;
+    
+    for (int i = 0; i < width; i++)
+    {
+        for (int j = 0; j < height; j++)
+        {
+            const float left = (i * elementWidth) - 1;
+            const float right = left + elementWidth;
+            
+            const float top = 1 - (j * elementHeight);
+            const float bottom = top - elementHeight;
+            
+            vertices.insert(vertices.end(), {
+            // Position (2)    Color (3)   Texcoords (2)
+            left,  top, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, // Top-left
+            right,  top, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f, // Top-right
+            right, bottom, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f, // Bottom-right
+            left, bottom, 1.0f, 1.0f, 1.0f, 0.0f, 1.0f  // Bottom-left
+            });
+        }
+    }
+    
+    return vertices;
+}
+
+std::vector<GLuint> elementsForTiling(int width, int height)
+{
+    std::vector<GLuint> elements;
+    elements.reserve(width * height * 6);
+    
+    for (int i = 0; i < width; i++)
+    {
+        for (int j = 0; j < height; j++)
+        {
+            const unsigned firstVertex = (i * 4) + (j * width * 4);
+            elements.insert(elements.end(), {
+                firstVertex, firstVertex + 1, firstVertex + 2,
+                firstVertex + 2, firstVertex + 3, firstVertex
+            });
+        }
+    }
+    
+    return elements;
+}
+
+const static int width = 28;
+const static int height = 22;
+
 - (instancetype) init {
     
     if((self = [super init]))
@@ -57,28 +113,23 @@ void main()
         GLuint vbo;
         glGenBuffers(1, &vbo);
         
-        GLfloat vertices[] = {
-            // Position (2)    Color (3)   Texcoords (2)
-            -0.5f,  0.5f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, // Top-left
-            0.5f,  0.5f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f, // Top-right
-            0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f, // Bottom-right
-            -0.5f, -0.5f, 1.0f, 1.0f, 1.0f, 0.0f, 1.0f  // Bottom-left
-        };
+        static std::vector<GLfloat> verticesVector = tile(width, height);
+        GLfloat *vertices = verticesVector.data();
+        const size_t vertexCount = verticesVector.size();
         
         glBindBuffer(GL_ARRAY_BUFFER, vbo);
-        glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+        glBufferData(GL_ARRAY_BUFFER, vertexCount * sizeof(GLfloat), vertices, GL_STATIC_DRAW);
         
         // Create an element array
         GLuint ebo;
         glGenBuffers(1, &ebo);
         
-        GLuint elements[] = {
-            0, 1, 2,
-            2, 3, 0
-        };
+        static std::vector<GLuint> elementsVector = elementsForTiling(width, height);
+        GLuint *elements = elementsVector.data();
+        const size_t elementCount = elementsVector.size();
         
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
-        glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(elements), elements, GL_STATIC_DRAW);
+        glBufferData(GL_ELEMENT_ARRAY_BUFFER, elementCount * sizeof(GLuint), elements, GL_STATIC_DRAW);
         
         // Create and compile the vertex shader
         GLuint vertexShader = glCreateShader(GL_VERTEX_SHADER);
@@ -101,25 +152,25 @@ void main()
         // Specify the layout of the vertex data
         GLint posAttrib = glGetAttribLocation(shaderProgram, "position");
         glEnableVertexAttribArray(posAttrib);
-        glVertexAttribPointer(posAttrib, 2, GL_FLOAT, GL_FALSE, 7 * sizeof(GLfloat), 0);
+        glVertexAttribPointer(posAttrib, 2, GL_FLOAT, GL_FALSE, COMPONENTS_PER_VERTEX * sizeof(GLfloat), 0);
         
         GLint colAttrib = glGetAttribLocation(shaderProgram, "color");
         glEnableVertexAttribArray(colAttrib);
-        glVertexAttribPointer(colAttrib, 3, GL_FLOAT, GL_FALSE, 7 * sizeof(GLfloat), (void*)(2 * sizeof(GLfloat)));
+        glVertexAttribPointer(colAttrib, 3, GL_FLOAT, GL_FALSE, COMPONENTS_PER_VERTEX * sizeof(GLfloat), (void*)(2 * sizeof(GLfloat)));
         
         GLint texAttrib = glGetAttribLocation(shaderProgram, "texcoord");
         glEnableVertexAttribArray(texAttrib);
-        glVertexAttribPointer(texAttrib, 2, GL_FLOAT, GL_FALSE, 7 * sizeof(GLfloat), (void*)(5 * sizeof(GLfloat)));
+        glVertexAttribPointer(texAttrib, 2, GL_FLOAT, GL_FALSE, COMPONENTS_PER_VERTEX * sizeof(GLfloat), (void*)(5 * sizeof(GLfloat)));
         
         // Load texture
         GLuint tex;
         glGenTextures(1, &tex);
         glBindTexture(GL_TEXTURE_2D, tex);
         
-        int width, height;
+        int imageWidth = 0, imageHeight = 0;
         NSString *filePath = [[NSBundle mainBundle] pathForResource:@"img" ofType:@"png"];
-        unsigned char* image = SOIL_load_image([filePath UTF8String], &width, &height, 0, SOIL_LOAD_RGB);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, image);
+        unsigned char* image = SOIL_load_image([filePath UTF8String], &imageWidth, &imageHeight, 0, SOIL_LOAD_RGB);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, imageWidth, imageHeight, 0, GL_RGB, GL_UNSIGNED_BYTE, image);
         SOIL_free_image_data(image);
         
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
@@ -137,7 +188,7 @@ void main()
     glClear(GL_COLOR_BUFFER_BIT);
     
     // Draw a rectangle from the 2 triangles using 6 indices
-    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+    glDrawElements(GL_TRIANGLES, width * height * 6, GL_UNSIGNED_INT, 0);
 }
 
 - (void) dealloc {
