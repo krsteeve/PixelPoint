@@ -12,6 +12,7 @@
 
 - (instancetype) init;
 - (void) render;
+- (void) loadTexture:(unsigned char *)texture withWidth:(int)width andHeight:(int)height;
 - (void) dealloc;
 
 @end

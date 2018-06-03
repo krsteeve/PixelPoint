@@ -10,6 +10,7 @@
 #import "PixelPointRenderer.h"
 #import <OpenGL/OpenGL.h>
 #include <OpenGL/gl3.h>
+#include "SOIL.h"
 
 #define SUPPORT_RETINA_RESOLUTION 1
 
@@ -43,6 +44,37 @@ static CVReturn MyDisplayLinkCallback(CVDisplayLinkRef displayLink,
     CVReturn result = [(__bridge PixelPointView*)displayLinkContext getFrameForTime:outputTime];
     return result;
 }
+
+struct Color
+{
+    Color (unsigned char *values)
+    {
+        red = values[0];
+        green = values[1];
+        blue = values[2];
+    }
+    
+    Color ()
+    {
+        red = 0;
+        blue = 0;
+        green = 0;
+    }
+    
+    long red;
+    long green;
+    long blue;
+    
+    static Color average(Color a, Color b, Color c, Color d)
+    {
+        Color result;
+        result.red = sqrt((a.red * a.red + b.red * b.red + c.red * c.red + d.red * d.red) / 4.0);
+        result.green = sqrt((a.green * a.green + b.green * b.green + c.green * c.green + d.green * d.green) / 4.0);
+        result.blue = sqrt((a.blue * a.blue + b.blue * b.blue + c.blue * c.blue + d.blue * d.blue) / 4.0);
+        
+        return result;
+    }
+};
 
 - (void) awakeFromNib
 {
@@ -82,6 +114,90 @@ static CVReturn MyDisplayLinkCallback(CVDisplayLinkRef displayLink,
     // Opt-In to Retina resolution
     [self setWantsBestResolutionOpenGLSurface:YES];
 #endif // SUPPORT_RETINA_RESOLUTION
+    
+    unsigned char *resultImage = 0;
+    int resultWidth = 0;
+    int resultHeight = 0;
+    int resultChannels = 0;
+    
+    NSArray *fileTypes = [NSImage imageTypes];
+    NSOpenPanel * panel = [NSOpenPanel openPanel];
+    [panel setAllowsMultipleSelection:NO];
+    [panel setCanChooseDirectories:NO];
+    [panel setCanChooseFiles:YES];
+    [panel setFloatingPanel:YES];
+    [panel setAllowedFileTypes:fileTypes];
+    NSInteger result = [panel runModal];
+    if(result == NSModalResponseOK)
+    {
+        NSURL *imageUrl = [[panel URLs] objectAtIndex:0];
+        
+        int imageWidth = 0, imageHeight = 0;
+        NSString *filePath = [imageUrl relativePath];
+        unsigned char* image = SOIL_load_image([filePath UTF8String], &imageWidth, &imageHeight, &resultChannels, SOIL_LOAD_RGB);
+        
+        // process the image
+        
+        // down to 28x22 or 22x28
+        // half the image combining each 4 pixels into one
+        // do this once for now
+        while (imageWidth / 2 >=28 && imageHeight / 2 >= 22)
+        
+        {
+            long resultSize = ((long)(imageWidth / 2) * (long)(imageHeight / 2)) * resultChannels;
+            resultImage = (unsigned char *)malloc(resultSize * sizeof(unsigned char));
+            resultWidth = imageWidth / 2;
+            resultHeight = imageHeight / 2;
+            for (int i = 0; i < resultWidth; i++)
+            {
+                for (int j = 0; j < resultHeight; j++)
+                {
+                    long position = (j * 2 * imageWidth + i * 2) * resultChannels;
+                    long nextRowPosition = ((j * 2 + 1) * imageWidth + i * 2) * resultChannels;
+                    long targetPosition = (j * resultWidth + i) * resultChannels;
+                    
+                    Color color1(&image[position]);
+                    Color color2(&image[position + resultChannels]);
+                    Color color3(&image[nextRowPosition]);
+                    Color color4(&image[nextRowPosition + resultChannels]);
+                    
+                    Color average = Color::average(color1, color2, color3, color4);
+                    
+                    resultImage[targetPosition] = average.red;
+                    resultImage[targetPosition + 1] = average.green;
+                    resultImage[targetPosition + 2] = average.blue;
+                }
+            }
+            
+            // just free - can do it on our own malloc
+            SOIL_free_image_data(image);
+            
+            image = resultImage;
+            imageWidth = resultWidth;
+            imageHeight = resultHeight;
+        }
+        
+        [_renderer loadTexture:image withWidth:imageWidth andHeight:imageHeight];
+        
+        NSRect viewFrame = self.frame;
+        viewFrame.size.width = imageWidth * 16;
+        viewFrame.size.height = imageHeight * 16;
+        
+        [self setFrame:viewFrame];
+        [_window setFrame:viewFrame display:YES];
+        
+    }
+    
+    /*NSSavePanel *savePanel = [NSSavePanel savePanel];
+    [savePanel setNameFieldStringValue:@"Chiko-2.tga"];
+    long saveResult = [savePanel runModal];
+    if (saveResult == NSModalResponseOK)
+    {
+        NSURL *savePath = [savePanel URL];
+        SOIL_save_image([[savePath relativePath] UTF8String], SOIL_SAVE_TYPE_TGA, resultWidth, resultHeight, resultChannels, resultImage);
+    }*/
+    
+    free(resultImage);
 }
 
 - (void) prepareOpenGL
