@@ -21,6 +21,11 @@ struct Color
         blue = values[2];
     }
     
+    Color (int red, int green, int blue)
+    : red(red), green(green), blue(blue)
+    {
+    }
+    
     Color ()
     {
         red = 0;

@@ -17,15 +17,20 @@
 struct Quad
 {
     Quad (float topLeft[2], float bottomRight[2], Color);
+    ~Quad();
     
-    float topLeft[2];
-    float bottomRight[2];
+    float topLeft() const;
+    float bottomRight() const;
     
-    Color color;
+    Color color() const;
     
     static bool isPointInQuad(const Quad &quad, float point[2]);
     
     static std::vector<Quad> quads;
+    
+private:
+    size_t vertexOffset;
+    size_t elementOffset;
 };
 
 #endif /* Quad_hpp */

@@ -20,13 +20,10 @@ const GLchar* vertexSource = R"glsl(
 #version 150 core
 in vec2 position;
 in vec3 color;
-in vec2 texcoord;
 out vec3 Color;
-out vec2 Texcoord;
 void main()
 {
     Color = color;
-    Texcoord = texcoord;
     gl_Position = vec4(position, 0.0, 1.0);
 }
 )glsl";
@@ -34,18 +31,18 @@ void main()
 const GLchar* fragmentSource = R"glsl(
 #version 150 core
 in vec3 Color;
-in vec2 Texcoord;
 out vec4 outColor;
-uniform sampler2D tex;
 void main()
 {
     outColor = vec4(Color, 1.0);
 }
 )glsl";
 
-static const int COMPONENTS_PER_VERTEX = 7;
+static const int COMPONENTS_PER_VERTEX = 5;
 
-std::vector<GLfloat> tile (unsigned char *texture, int width, int height) {
+#include "Quad.h"
+
+void tile (unsigned char *texture, int width, int height) {
     std::vector<GLfloat> vertices;
     vertices.reserve(width * height * COMPONENTS_PER_VERTEX * 4);
     
@@ -62,41 +59,17 @@ std::vector<GLfloat> tile (unsigned char *texture, int width, int height) {
             const float top = 1 - (j * elementHeight);
             const float bottom = top - elementHeight;
             
-            float red = texture[(j * width + i) * 3] / 255.0f;
-            float green = texture[(j * width + i) * 3 + 1] / 255.0f;
-            float blue = texture[(j * width + i) * 3 + 2] / 255.0f;
+            float topLeft[] = {left, top};
+            float bottomRight[] = {right, bottom};
             
-            vertices.insert(vertices.end(), {
-            // Position (2)    Color (3)   Texcoords (2)
-            left,  top, red, green, blue, 0.0f, 0.0f, // Top-left
-            right,  top, red, green, blue, 1.0f, 0.0f, // Top-right
-            right, bottom, red, green, blue, 1.0f, 1.0f, // Bottom-right
-            left, bottom, red, green, blue, 0.0f, 1.0f  // Bottom-left
-            });
+            int red = texture[(j * width + i) * 3];
+            int green = texture[(j * width + i) * 3 + 1];
+            int blue = texture[(j * width + i) * 3 + 2];
+            
+            Quad quad(topLeft, bottomRight, Color(red, green, blue));
+            Quad::quads.push_back(quad);
         }
     }
-    
-    return vertices;
-}
-
-std::vector<GLuint> elementsForTiling(int width, int height)
-{
-    std::vector<GLuint> elements;
-    elements.reserve(width * height * 6);
-    
-    for (int i = 0; i < width; i++)
-    {
-        for (int j = 0; j < height; j++)
-        {
-            const unsigned firstVertex = (i * 4) + (j * width * 4);
-            elements.insert(elements.end(), {
-                firstVertex, firstVertex + 1, firstVertex + 2,
-                firstVertex + 2, firstVertex + 3, firstVertex
-            });
-        }
-    }
-    
-    return elements;
 }
 
 std::vector<GLfloat> PixelPointRenderer::vertices;
@@ -123,7 +96,8 @@ void PixelPointRenderer::loadTexture(unsigned char *texture, int width, int heig
     GLuint vbo;
     glGenBuffers(1, &vbo);
     
-    vertices = tile(texture, width, height);
+    tile(texture, width, height);
+    
     GLfloat *vertexData = vertices.data();
     const size_t vertexCount = vertices.size();
     
@@ -134,7 +108,7 @@ void PixelPointRenderer::loadTexture(unsigned char *texture, int width, int heig
     GLuint ebo;
     glGenBuffers(1, &ebo);
     
-    elements = elementsForTiling(width, height);
+    //elements = elementsForTiling(width, height);
     GLuint *elementData = elements.data();
     const size_t elementCount = elements.size();
     
@@ -168,21 +142,21 @@ void PixelPointRenderer::loadTexture(unsigned char *texture, int width, int heig
     glEnableVertexAttribArray(colAttrib);
     glVertexAttribPointer(colAttrib, 3, GL_FLOAT, GL_FALSE, COMPONENTS_PER_VERTEX * sizeof(GLfloat), (void*)(2 * sizeof(GLfloat)));
     
-    GLint texAttrib = glGetAttribLocation(shaderProgram, "texcoord");
-    glEnableVertexAttribArray(texAttrib);
-    glVertexAttribPointer(texAttrib, 2, GL_FLOAT, GL_FALSE, COMPONENTS_PER_VERTEX * sizeof(GLfloat), (void*)(5 * sizeof(GLfloat)));
+    //GLint texAttrib = glGetAttribLocation(shaderProgram, "texcoord");
+    //glEnableVertexAttribArray(texAttrib);
+    //glVertexAttribPointer(texAttrib, 2, GL_FLOAT, GL_FALSE, COMPONENTS_PER_VERTEX * sizeof(GLfloat), (void*)(5 * sizeof(GLfloat)));
     
     // Load texture
-    GLuint tex;
-    glGenTextures(1, &tex);
-    glBindTexture(GL_TEXTURE_2D, tex);
+    //GLuint tex;
+    //glGenTextures(1, &tex);
+    //glBindTexture(GL_TEXTURE_2D, tex);
     
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, texture);
+    //glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, texture);
     
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 }
 
 void PixelPointRenderer::render()
