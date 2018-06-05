@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		30A8BFDD20C6CFF400100E35 /* Quad.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 30A8BFDB20C6CFF400100E35 /* Quad.cpp */; };
+		30A8BFE020C6F8EF00100E35 /* Color.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 30A8BFDE20C6F8EF00100E35 /* Color.cpp */; };
 		30FA920A209D34300042482B /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 30FA9209209D34300042482B /* AppDelegate.m */; };
 		30FA920D209D34300042482B /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 30FA920C209D34300042482B /* ViewController.m */; };
 		30FA920F209D34300042482B /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 30FA920E209D34300042482B /* Assets.xcassets */; };
@@ -38,6 +40,10 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		30A8BFDB20C6CFF400100E35 /* Quad.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Quad.cpp; sourceTree = "<group>"; };
+		30A8BFDC20C6CFF400100E35 /* Quad.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Quad.h; sourceTree = "<group>"; };
+		30A8BFDE20C6F8EF00100E35 /* Color.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Color.cpp; sourceTree = "<group>"; };
+		30A8BFDF20C6F8EF00100E35 /* Color.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Color.h; sourceTree = "<group>"; };
 		30FA9205209D34300042482B /* PixelPoint.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = PixelPoint.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		30FA9208209D34300042482B /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
 		30FA9209209D34300042482B /* AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
@@ -125,6 +131,10 @@
 				30FA9213209D34300042482B /* Info.plist */,
 				30FA9214209D34300042482B /* main.m */,
 				30FA9216209D34300042482B /* PixelPoint.entitlements */,
+				30A8BFDB20C6CFF400100E35 /* Quad.cpp */,
+				30A8BFDC20C6CFF400100E35 /* Quad.h */,
+				30A8BFDE20C6F8EF00100E35 /* Color.cpp */,
+				30A8BFDF20C6F8EF00100E35 /* Color.h */,
 			);
 			path = PixelPoint;
 			sourceTree = "<group>";
@@ -289,6 +299,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				30A8BFE020C6F8EF00100E35 /* Color.cpp in Sources */,
+				30A8BFDD20C6CFF400100E35 /* Quad.cpp in Sources */,
 				30FA920D209D34300042482B /* ViewController.m in Sources */,
 				30FA9215209D34300042482B /* main.m in Sources */,
 				30FA923F209D4E8D0042482B /* PixelPointRenderer.mm in Sources */,

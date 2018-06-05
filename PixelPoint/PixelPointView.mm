@@ -11,6 +11,7 @@
 #import <OpenGL/OpenGL.h>
 #include <OpenGL/gl3.h>
 #include "SOIL.h"
+#include "Color.h"
 
 #define SUPPORT_RETINA_RESOLUTION 1
 
@@ -44,37 +45,6 @@ static CVReturn MyDisplayLinkCallback(CVDisplayLinkRef displayLink,
     CVReturn result = [(__bridge PixelPointView*)displayLinkContext getFrameForTime:outputTime];
     return result;
 }
-
-struct Color
-{
-    Color (unsigned char *values)
-    {
-        red = values[0];
-        green = values[1];
-        blue = values[2];
-    }
-    
-    Color ()
-    {
-        red = 0;
-        blue = 0;
-        green = 0;
-    }
-    
-    long red;
-    long green;
-    long blue;
-    
-    static Color average(Color a, Color b, Color c, Color d)
-    {
-        Color result;
-        result.red = sqrt((a.red * a.red + b.red * b.red + c.red * c.red + d.red * d.red) / 4.0);
-        result.green = sqrt((a.green * a.green + b.green * b.green + c.green * c.green + d.green * d.green) / 4.0);
-        result.blue = sqrt((a.blue * a.blue + b.blue * b.blue + c.blue * c.blue + d.blue * d.blue) / 4.0);
-        
-        return result;
-    }
-};
 
 - (void) awakeFromNib
 {
@@ -177,7 +147,7 @@ struct Color
             imageHeight = resultHeight;
         }
         
-        [_renderer loadTexture:image withWidth:imageWidth andHeight:imageHeight];
+        _renderer->loadTexture(image, imageWidth, imageHeight);
         
         NSRect viewFrame = self.frame;
         viewFrame.size.width = imageWidth * 16;
@@ -318,7 +288,7 @@ struct Color
     // simultaneously when resizing
     CGLLockContext([[self openGLContext] CGLContextObj]);
     
-    [_renderer render];
+    _renderer->render();
     
     CGLFlushDrawable([[self openGLContext] CGLContextObj]);
     CGLUnlockContext([[self openGLContext] CGLContextObj]);
@@ -351,7 +321,7 @@ struct Color
     
     NSLog(@"%s %s", glGetString(GL_RENDERER), glGetString(GL_VERSION));
     
-    _renderer = [[PixelPointRenderer alloc] init];
+    _renderer = new PixelPointRenderer();
 }
 
 @end

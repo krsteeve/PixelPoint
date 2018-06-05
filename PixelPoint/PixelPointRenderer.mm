@@ -15,8 +15,6 @@
 
 #include "SOIL.h"
 
-@implementation PixelPointRenderer
-
 // Shader sources
 const GLchar* vertexSource = R"glsl(
 #version 150 core
@@ -101,21 +99,21 @@ std::vector<GLuint> elementsForTiling(int width, int height)
     return elements;
 }
 
-- (instancetype) init {
+std::vector<GLfloat> PixelPointRenderer::vertices;
+std::vector<GLuint> PixelPointRenderer::elements;
+
+PixelPointRenderer::PixelPointRenderer()
+{
     
-    if((self = [super init]))
-    {
-        
-        
-    }
-    
-    return self;
 }
 
-static int windowWidth = 0;
-static int windowHeight = 0;
+PixelPointRenderer::~PixelPointRenderer()
+{
+    
+}
 
-- (void) loadTexture:(unsigned char *)texture withWidth:(int)width andHeight:(int)height {
+void PixelPointRenderer::loadTexture(unsigned char *texture, int width, int height)
+{
     // Create Vertex Array Object
     GLuint vao;
     glGenVertexArrays(1, &vao);
@@ -125,23 +123,23 @@ static int windowHeight = 0;
     GLuint vbo;
     glGenBuffers(1, &vbo);
     
-    static std::vector<GLfloat> verticesVector = tile(texture, width, height);
-    GLfloat *vertices = verticesVector.data();
-    const size_t vertexCount = verticesVector.size();
+    vertices = tile(texture, width, height);
+    GLfloat *vertexData = vertices.data();
+    const size_t vertexCount = vertices.size();
     
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
-    glBufferData(GL_ARRAY_BUFFER, vertexCount * sizeof(GLfloat), vertices, GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, vertexCount * sizeof(GLfloat), vertexData, GL_STATIC_DRAW);
     
     // Create an element array
     GLuint ebo;
     glGenBuffers(1, &ebo);
     
-    static std::vector<GLuint> elementsVector = elementsForTiling(width, height);
-    GLuint *elements = elementsVector.data();
-    const size_t elementCount = elementsVector.size();
+    elements = elementsForTiling(width, height);
+    GLuint *elementData = elements.data();
+    const size_t elementCount = elements.size();
     
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, elementCount * sizeof(GLuint), elements, GL_STATIC_DRAW);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, elementCount * sizeof(GLuint), elementData, GL_STATIC_DRAW);
     
     // Create and compile the vertex shader
     GLuint vertexShader = glCreateShader(GL_VERTEX_SHADER);
@@ -185,22 +183,14 @@ static int windowHeight = 0;
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    
-    windowWidth = width;
-    windowHeight = height;
 }
 
-- (void) render {
+void PixelPointRenderer::render()
+{
     // Clear the screen to black
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT);
     
     // Draw a rectangle from the 2 triangles using 6 indices
-    glDrawElements(GL_TRIANGLES, windowWidth * windowHeight * 6, GL_UNSIGNED_INT, 0);
+    glDrawElements(GL_TRIANGLES, (int)vertices.size(), GL_UNSIGNED_INT, 0);
 }
-
-- (void) dealloc {
-    
-}
-
-@end

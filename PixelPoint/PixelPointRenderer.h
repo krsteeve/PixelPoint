@@ -6,13 +6,20 @@
 //  Copyright © 2018 Kelsey Steeves. All rights reserved.
 //
 
-#import <Foundation/Foundation.h>
+#import <OpenGL/OpenGL.h>
+#include <OpenGL/gl3.h>
 
-@interface PixelPointRenderer : NSObject
+#include <vector>
 
-- (instancetype) init;
-- (void) render;
-- (void) loadTexture:(unsigned char *)texture withWidth:(int)width andHeight:(int)height;
-- (void) dealloc;
-
-@end
+class PixelPointRenderer
+{
+public:
+    PixelPointRenderer();
+    ~PixelPointRenderer();
+    
+    void render();
+    void loadTexture(unsigned char *texture, int width, int height);
+    
+    static std::vector<GLfloat> vertices;
+    static std::vector<GLuint> elements;
+};
