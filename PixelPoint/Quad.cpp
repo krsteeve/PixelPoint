@@ -38,7 +38,46 @@ Quad::~Quad()
 
 bool Quad::isPointInQuad(const Quad &quad, float point[2])
 {
-    return false;
+    std::vector<GLfloat> *vertices = &PixelPointRenderer::vertices;
+    
+    const float left = vertices->at(quad.vertexOffset);
+    const float top = vertices->at(quad.vertexOffset + 1);
+    const float right = vertices->at(quad.vertexOffset + 5);
+    const float bottom = vertices->at(quad.vertexOffset + 11);
+    
+    
+    
+    return left <= point[0] && right >= point[0] && bottom <= point[1] && top >= point[1];
+}
+
+void Quad::setColorToBlack()
+{
+    std::vector<GLfloat> *vertices = &PixelPointRenderer::vertices;
+    vertices->at(vertexOffset + 2) = 0.0f;
+    vertices->at(vertexOffset + 3) = 0.0f;
+    vertices->at(vertexOffset + 4) = 0.0f;
+    
+    vertices->at(vertexOffset + 7) = 0.0f;
+    vertices->at(vertexOffset + 8) = 0.0f;
+    vertices->at(vertexOffset + 9) = 0.0f;
+    
+    vertices->at(vertexOffset + 12) = 0.0f;
+    vertices->at(vertexOffset + 13) = 0.0f;
+    vertices->at(vertexOffset + 14) = 0.0f;
+    
+    vertices->at(vertexOffset + 17) = 0.0f;
+    vertices->at(vertexOffset + 18) = 0.0f;
+    vertices->at(vertexOffset + 19) = 0.0f;
+    
+    GLenum error = glGetError();
+    printf("error %i", error);
+    
+    glBindBuffer(GL_ARRAY_BUFFER, 1);
+    //glBufferData(GL_ARRAY_BUFFER, vertices->size() * sizeof(GLfloat), vertices->data(), GL_DYNAMIC_DRAW);
+    glBufferSubData(GL_ARRAY_BUFFER, vertexOffset * sizeof(GLfloat), 20 * sizeof(GLfloat), &PixelPointRenderer::vertices[vertexOffset]);
+    
+    error = glGetError();
+    printf("error %i", error);
 }
 
 std::vector<Quad> Quad::quads;

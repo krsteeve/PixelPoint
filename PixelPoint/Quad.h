@@ -16,6 +16,11 @@
 
 struct Quad
 {
+    Quad()
+    {
+        vertexOffset = -1;
+        elementOffset = -1;
+    }
     Quad (float topLeft[2], float bottomRight[2], Color);
     ~Quad();
     
@@ -26,7 +31,14 @@ struct Quad
     
     static bool isPointInQuad(const Quad &quad, float point[2]);
     
+    void setColorToBlack();
+    
     static std::vector<Quad> quads;
+    
+    friend bool operator==(const Quad &lhs, const Quad &rhs)
+    {
+        return lhs.vertexOffset == rhs.vertexOffset;
+    }
     
 private:
     size_t vertexOffset;

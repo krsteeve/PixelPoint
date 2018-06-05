@@ -12,6 +12,7 @@
 #include <OpenGL/gl3.h>
 #include "SOIL.h"
 #include "Color.h"
+#include "Quad.h"
 
 #define SUPPORT_RETINA_RESOLUTION 1
 
@@ -322,6 +323,53 @@ static CVReturn MyDisplayLinkCallback(CVDisplayLinkRef displayLink,
     NSLog(@"%s %s", glGetString(GL_RENDERER), glGetString(GL_VERSION));
     
     _renderer = new PixelPointRenderer();
+}
+
+static Quad mouseDownLocation;
+
+- (NSPoint)screenToOpenGLCoordinates: (NSPoint) point
+{
+    NSPoint glCoord;
+    
+    NSRect viewFrame = self.frame;
+    
+    glCoord.x = (point.x / (viewFrame.size.width / 2)) - 1;
+    glCoord.y = (point.y / (viewFrame.size.height / 2)) - 1;
+    return glCoord;
+}
+
+- (void)mouseDown:(NSEvent *)event
+{
+    NSPoint mouseLocation = [self screenToOpenGLCoordinates: [event locationInWindow]];
+    float point [] = {(float)mouseLocation.x, (float)mouseLocation.y};
+    for (Quad quad : Quad::quads)
+    {
+        if (Quad::isPointInQuad(quad, point))
+        {
+            mouseDownLocation = quad;
+            break;
+        }
+    }
+}
+
+- (void)mouseUp:(NSEvent *)event
+{
+    NSPoint mouseLocation = [self screenToOpenGLCoordinates: [event locationInWindow]];
+    float point [] = {(float)mouseLocation.x, (float)mouseLocation.y};
+    for (Quad quad : Quad::quads)
+    {
+        if (Quad::isPointInQuad(quad, point))
+        {
+            if (mouseDownLocation == quad)
+            {
+                [[self openGLContext] makeCurrentContext];
+                quad.setColorToBlack();
+                
+                [self setNeedsDisplay:YES];
+            }
+            break;
+        }
+    }
 }
 
 @end

@@ -102,7 +102,7 @@ void PixelPointRenderer::loadTexture(unsigned char *texture, int width, int heig
     const size_t vertexCount = vertices.size();
     
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
-    glBufferData(GL_ARRAY_BUFFER, vertexCount * sizeof(GLfloat), vertexData, GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, vertexCount * sizeof(GLfloat), vertexData, GL_DYNAMIC_DRAW);
     
     // Create an element array
     GLuint ebo;
@@ -161,8 +161,8 @@ void PixelPointRenderer::loadTexture(unsigned char *texture, int width, int heig
 
 void PixelPointRenderer::render()
 {
-    // Clear the screen to black
-    glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+    // Clear the screen to white
+    glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT);
     
     // Draw a rectangle from the 2 triangles using 6 indices
