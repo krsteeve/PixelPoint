@@ -59,10 +59,7 @@ CGFloat effectiveScale;
     NSError *error = nil;
     
     AVCaptureSession *session = [AVCaptureSession new];
-    if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPhone)
-        [session setSessionPreset:AVCaptureSessionPreset640x480];
-    else
-        [session setSessionPreset:AVCaptureSessionPresetPhoto];
+    [session setSessionPreset:AVCaptureSessionPresetPhoto];
     
     // Select a video device, make an input
     AVCaptureDevice *device = [AVCaptureDevice defaultDeviceWithMediaType:AVMediaTypeVideo];

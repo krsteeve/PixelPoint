@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		308FC10C213D894600A90502 /* Image.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 308FC10A213D894600A90502 /* Image.cpp */; };
 		30A8BFDD20C6CFF400100E35 /* Quad.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 30A8BFDB20C6CFF400100E35 /* Quad.cpp */; };
 		30A8BFE020C6F8EF00100E35 /* Color.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 30A8BFDE20C6F8EF00100E35 /* Color.cpp */; };
 		30FA920A209D34300042482B /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 30FA9209209D34300042482B /* AppDelegate.m */; };
@@ -40,6 +41,8 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		308FC10A213D894600A90502 /* Image.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Image.cpp; sourceTree = "<group>"; };
+		308FC10B213D894600A90502 /* Image.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Image.h; sourceTree = "<group>"; };
 		30A8BFDB20C6CFF400100E35 /* Quad.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Quad.cpp; sourceTree = "<group>"; };
 		30A8BFDC20C6CFF400100E35 /* Quad.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Quad.h; sourceTree = "<group>"; };
 		30A8BFDE20C6F8EF00100E35 /* Color.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Color.cpp; sourceTree = "<group>"; };
@@ -135,6 +138,8 @@
 				30A8BFDC20C6CFF400100E35 /* Quad.h */,
 				30A8BFDE20C6F8EF00100E35 /* Color.cpp */,
 				30A8BFDF20C6F8EF00100E35 /* Color.h */,
+				308FC10A213D894600A90502 /* Image.cpp */,
+				308FC10B213D894600A90502 /* Image.h */,
 			);
 			path = PixelPoint;
 			sourceTree = "<group>";
@@ -304,6 +309,7 @@
 				30FA920D209D34300042482B /* ViewController.m in Sources */,
 				30FA9215209D34300042482B /* main.m in Sources */,
 				30FA923F209D4E8D0042482B /* PixelPointRenderer.mm in Sources */,
+				308FC10C213D894600A90502 /* Image.cpp in Sources */,
 				30FA923C209D35DF0042482B /* PixelPointView.mm in Sources */,
 				30FA920A209D34300042482B /* AppDelegate.m in Sources */,
 			);

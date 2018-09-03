@@ -6,14 +6,9 @@
 //  Copyright © 2018 Kelsey Steeves. All rights reserved.
 //
 
-#import <AppKit/AppKit.h>
-
 #import "PixelPointRenderer.h"
-#import <OpenGL/OpenGL.h>
-#include <OpenGL/gl3.h>
-#include <vector>
 
-#include "SOIL.h"
+#include <vector>
 
 // Shader sources
 const GLchar* vertexSource = R"glsl(
@@ -85,8 +80,12 @@ PixelPointRenderer::~PixelPointRenderer()
     
 }
 
-void PixelPointRenderer::loadTexture(unsigned char *texture, int width, int height)
+void PixelPointRenderer::loadTexture(const Image &image)
 {
+    unsigned char *texture = image.data.get();
+    int width = image.width;
+    int height = image.height;
+    
     // Create Vertex Array Object
     GLuint vao;
     glGenVertexArrays(1, &vao);
@@ -129,7 +128,6 @@ void PixelPointRenderer::loadTexture(unsigned char *texture, int width, int heig
     GLuint shaderProgram = glCreateProgram();
     glAttachShader(shaderProgram, vertexShader);
     glAttachShader(shaderProgram, fragmentShader);
-    glBindFragDataLocation(shaderProgram, 0, "outColor");
     glLinkProgram(shaderProgram);
     glUseProgram(shaderProgram);
     

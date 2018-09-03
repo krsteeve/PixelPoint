@@ -7,6 +7,10 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		308FC102213D810800A90502 /* Quad.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 308FC0FE213D810800A90502 /* Quad.cpp */; };
+		308FC103213D810800A90502 /* Color.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 308FC0FF213D810800A90502 /* Color.cpp */; };
+		308FC106213D854C00A90502 /* GLKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 308FC105213D854C00A90502 /* GLKit.framework */; };
+		308FC109213D875D00A90502 /* PixelPointRenderer.mm in Sources */ = {isa = PBXBuildFile; fileRef = 308FC107213D875C00A90502 /* PixelPointRenderer.mm */; };
 		30FD74EC213B13E8001C67AC /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 30FD74EB213B13E8001C67AC /* AppDelegate.m */; };
 		30FD74EF213B13E8001C67AC /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 30FD74EE213B13E8001C67AC /* ViewController.m */; };
 		30FD74F2213B13E9001C67AC /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 30FD74F0213B13E9001C67AC /* Main.storyboard */; };
@@ -35,6 +39,13 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		308FC0FE213D810800A90502 /* Quad.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Quad.cpp; path = ../../PixelPoint/Quad.cpp; sourceTree = "<group>"; };
+		308FC0FF213D810800A90502 /* Color.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Color.cpp; path = ../../PixelPoint/Color.cpp; sourceTree = "<group>"; };
+		308FC100213D810800A90502 /* Quad.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Quad.h; path = ../../PixelPoint/Quad.h; sourceTree = "<group>"; };
+		308FC101213D810800A90502 /* Color.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Color.h; path = ../../PixelPoint/Color.h; sourceTree = "<group>"; };
+		308FC105213D854C00A90502 /* GLKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = GLKit.framework; path = System/Library/Frameworks/GLKit.framework; sourceTree = SDKROOT; };
+		308FC107213D875C00A90502 /* PixelPointRenderer.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = PixelPointRenderer.mm; path = ../../PixelPoint/PixelPointRenderer.mm; sourceTree = "<group>"; };
+		308FC108213D875C00A90502 /* PixelPointRenderer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = PixelPointRenderer.h; path = ../../PixelPoint/PixelPointRenderer.h; sourceTree = "<group>"; };
 		30FD74E7213B13E8001C67AC /* PixelPoint-iPhone.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "PixelPoint-iPhone.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		30FD74EA213B13E8001C67AC /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
 		30FD74EB213B13E8001C67AC /* AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
@@ -58,6 +69,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				308FC106213D854C00A90502 /* GLKit.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -78,6 +90,14 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		308FC104213D854C00A90502 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				308FC105213D854C00A90502 /* GLKit.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
 		30FD74DE213B13E8001C67AC = {
 			isa = PBXGroup;
 			children = (
@@ -85,6 +105,7 @@
 				30FD7502213B13E9001C67AC /* PixelPoint-iPhoneTests */,
 				30FD750D213B13E9001C67AC /* PixelPoint-iPhoneUITests */,
 				30FD74E8213B13E8001C67AC /* Products */,
+				308FC104213D854C00A90502 /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -101,6 +122,12 @@
 		30FD74E9213B13E8001C67AC /* PixelPoint-iPhone */ = {
 			isa = PBXGroup;
 			children = (
+				308FC108213D875C00A90502 /* PixelPointRenderer.h */,
+				308FC107213D875C00A90502 /* PixelPointRenderer.mm */,
+				308FC0FF213D810800A90502 /* Color.cpp */,
+				308FC101213D810800A90502 /* Color.h */,
+				308FC0FE213D810800A90502 /* Quad.cpp */,
+				308FC100213D810800A90502 /* Quad.h */,
 				30FD74EA213B13E8001C67AC /* AppDelegate.h */,
 				30FD74EB213B13E8001C67AC /* AppDelegate.m */,
 				30FD74ED213B13E8001C67AC /* ViewController.h */,
@@ -265,7 +292,10 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				308FC109213D875D00A90502 /* PixelPointRenderer.mm in Sources */,
+				308FC102213D810800A90502 /* Quad.cpp in Sources */,
 				30FD74EF213B13E8001C67AC /* ViewController.m in Sources */,
+				308FC103213D810800A90502 /* Color.cpp in Sources */,
 				30FD74FA213B13E9001C67AC /* main.m in Sources */,
 				30FD74EC213B13E8001C67AC /* AppDelegate.m in Sources */,
 			);
@@ -432,6 +462,10 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = V2H27XVH47;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					IOS,
+					"NDEBUG=1",
+				);
 				INFOPLIST_FILE = "PixelPoint-iPhone/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = ReducedStyle.PixelPoint;
@@ -446,6 +480,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = V2H27XVH47;
+				GCC_PREPROCESSOR_DEFINITIONS = IOS;
 				INFOPLIST_FILE = "PixelPoint-iPhone/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = ReducedStyle.PixelPoint;

@@ -6,8 +6,14 @@
 //  Copyright © 2018 Kelsey Steeves. All rights reserved.
 //
 
+#include "Image.h"
+
+#if IOS
+#include <OpenGLES/ES3/gl.h>
+#else
 #import <OpenGL/OpenGL.h>
 #include <OpenGL/gl3.h>
+#endif
 
 #include <vector>
 
@@ -18,7 +24,7 @@ public:
     ~PixelPointRenderer();
     
     void render();
-    void loadTexture(unsigned char *texture, int width, int height);
+    void loadTexture(const Image &image);
     
     static std::vector<GLfloat> vertices;
     static std::vector<GLuint> elements;
