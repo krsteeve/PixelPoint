@@ -10,13 +10,16 @@
 
 #include "Color.h"
 
+#if !defined (IOS)
 #include "SOIL.h"
+#endif
 
 #include <algorithm>
 
 // we always use RGB
 static const int CHANNELS = 3;
 
+#if !defined(IOS)
 Image Image::loadImage(const char *filePath)
 {
     int imageWidth = 0, imageHeight = 0, resultChannels = 0;
@@ -24,6 +27,7 @@ Image Image::loadImage(const char *filePath)
     
     return Image(std::unique_ptr<unsigned char, decltype(&std::free)>(image, &std::free), imageWidth, imageHeight);
 }
+#endif
 
 Image Image::scaledFromSource(const Image &original)
 {

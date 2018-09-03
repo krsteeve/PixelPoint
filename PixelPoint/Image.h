@@ -37,7 +37,9 @@ struct Image : public GenericImage<decltype(&std::free)>
         
     }
     
+#if !defined(IOS)
     static Image loadImage(const char *filePath);
+#endif
     static Image scaledFromSource(const Image &original);
 };
 
