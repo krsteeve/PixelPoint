@@ -35,11 +35,11 @@ Image Image::scaledFromSource(const Image &original)
     int imageHeight = original.height;
     unsigned char *image = original.data.get();
     
-    return scaledFromSource(image, imageWidth, imageHeight);
+    return scaledFromSource(image, imageWidth, imageHeight, CHANNELS, imageWidth * CHANNELS);
 }
 
 
-Image Image::scaledFromSource(unsigned char *image, int imageWidth, int imageHeight)
+Image Image::scaledFromSource(unsigned char *image, int imageWidth, int imageHeight, int channels, int stride)
 {
     // process the image
     int calculatedWidth = imageWidth, calculatedHeight = imageHeight;
@@ -51,7 +51,7 @@ Image Image::scaledFromSource(unsigned char *image, int imageWidth, int imageHei
         numDivisions++;
     }
     
-    long resultSize = (long)calculatedWidth * (long)calculatedHeight * CHANNELS;
+    long resultSize = (long)calculatedWidth * (long)calculatedHeight * channels;
     unsigned char *resultImage = (unsigned char *)malloc(resultSize * sizeof(unsigned char));
     int resultWidth = calculatedWidth;
     int resultHeight = calculatedHeight;
@@ -70,7 +70,7 @@ Image Image::scaledFromSource(unsigned char *image, int imageWidth, int imageHei
             {
                 for (long y = 0; y < resultPixelSize; y++)
                 {
-                    long innerPos = ((j * resultPixelSize + y) * imageWidth + (i * resultPixelSize) + x) * CHANNELS;
+                    long innerPos = (j * resultPixelSize + y) * stride + ((i * resultPixelSize) + x) * channels;
                     redSum += image[innerPos] * image[innerPos];
                     greenSum += image[innerPos + 1] * image[innerPos + 1];
                     blueSum += image[innerPos + 2] * image[innerPos + 2];

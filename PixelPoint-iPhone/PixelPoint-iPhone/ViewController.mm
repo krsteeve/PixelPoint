@@ -40,6 +40,7 @@ CIDetector *faceDetector;
 CGFloat beginGestureScale;
 CGFloat effectiveScale;
 PixelPointRenderer *renderer;
+CGSize imageSize;
 
 
 - (void)viewDidLoad {
@@ -47,17 +48,19 @@ PixelPointRenderer *renderer;
     // Do any additional setup after loading the view, typically from a nib.
     [self setupAVCapture];
     
-    renderer = new PixelPointRenderer();
-    
     [_glkView setContext:[[EAGLContext alloc] initWithAPI:kEAGLRenderingAPIOpenGLES3]];
     [_glkView setNeedsDisplay];
     [_glkView setOpaque:NO];
     [_glkView setUserInteractionEnabled:NO];
+    
+    [EAGLContext setCurrentContext: _glkView.context];
+    renderer = new PixelPointRenderer();
 }
 
 - (IBAction)pixelize:(id)sender {
     shouldPixelize = [(UISwitch *)sender isOn];
     [[videoDataOutput connectionWithMediaType:AVMediaTypeVideo] setEnabled:shouldPixelize];
+    renderer->clear();
     [_glkView setNeedsDisplay];
 }
 
@@ -66,10 +69,62 @@ PixelPointRenderer *renderer;
     // Dispose of any resources that can be recreated.
 }
 
+- (void)reorientOutput: (AVCaptureVideoOrientation) newOrientation {
+    switch (newOrientation) {
+        case UIDeviceOrientationPortraitUpsideDown:  // Device oriented vertically, home button on the top
+            //exifOrientation = PHOTOS_EXIF_0ROW_LEFT_0COL_BOTTOM;
+            break;
+        case UIDeviceOrientationLandscapeLeft:       // Device oriented horizontally, home button on the right
+            if (isUsingFrontFacingCamera)
+            {
+                renderer->rotation = M_PI;
+                renderer->flip[0] = true;
+                renderer->flip[1] = false;
+            }
+            else
+            {
+                renderer->rotation = 0.0f;
+                renderer->flip[0] = false;
+                renderer->flip[1] = false;
+            }
+            break;
+        case UIDeviceOrientationLandscapeRight:      // Device oriented horizontally, home button on the left
+            if (isUsingFrontFacingCamera)
+            {
+                renderer->rotation = M_PI;
+                renderer->flip[0] = false;
+                renderer->flip[1] = true;
+            }
+            else
+            {
+                renderer->rotation = M_PI;
+                renderer->flip[0] = false;
+                renderer->flip[1] = false;
+            }
+            break;
+        case UIDeviceOrientationPortrait:            // Device oriented vertically, home button on the bottom
+            if (isUsingFrontFacingCamera)
+            {
+                renderer->rotation = -M_PI / 2.0f;
+                renderer->flip[0] = true;
+                renderer->flip[1] = false;
+            }
+            else
+            {
+                renderer->rotation = M_PI / 2.0f;
+                renderer->flip[0] = false;
+                renderer->flip[1] = false;
+            }
+            break;
+        default:
+            break;
+    }
+}
+
 - (void)viewDidLayoutSubviews
 {
     // get the new orientation from device
-    AVCaptureVideoOrientation newOrientation = [self avOrientationForDeviceOrientation:[[UIDevice currentDevice] orientation]];
+    AVCaptureVideoOrientation newOrientation = [self avOrientationForInterfaceOrientation:[[UIApplication sharedApplication] statusBarOrientation]];
     
     // set the orientation of preview layer :( which will be displayed in the device )
     [previewLayer.connection setVideoOrientation:newOrientation];
@@ -78,6 +133,8 @@ PixelPointRenderer *renderer;
     [[stillImageOutput connectionWithMediaType:AVMediaTypeVideo] setVideoOrientation:newOrientation];
     
     [previewLayer setFrame:_previewView.bounds];
+    
+    [self reorientOutput:newOrientation];
 }
 
 - (void)setupAVCapture
@@ -184,6 +241,9 @@ PixelPointRenderer *renderer;
         }
     }
     isUsingFrontFacingCamera = !isUsingFrontFacingCamera;
+    
+    AVCaptureVideoOrientation orientation = [self avOrientationForInterfaceOrientation:[[UIApplication sharedApplication] statusBarOrientation]];
+    [self reorientOutput:orientation];
 }
 
 // scale image depending on users pinch gesture
@@ -215,13 +275,9 @@ PixelPointRenderer *renderer;
 }
 
 // utility routing used during image capture to set up capture orientation
-- (AVCaptureVideoOrientation)avOrientationForDeviceOrientation:(UIDeviceOrientation)deviceOrientation
+- (AVCaptureVideoOrientation)avOrientationForInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation
 {
-    AVCaptureVideoOrientation result = (AVCaptureVideoOrientation)deviceOrientation;
-    if ( deviceOrientation == UIDeviceOrientationLandscapeLeft )
-        result = AVCaptureVideoOrientationLandscapeRight;
-    else if ( deviceOrientation == UIDeviceOrientationLandscapeRight )
-        result = AVCaptureVideoOrientationLandscapeLeft;
+    AVCaptureVideoOrientation result = (AVCaptureVideoOrientation)interfaceOrientation;
     return result;
 }
 
@@ -241,8 +297,7 @@ PixelPointRenderer *renderer;
 - (IBAction)takePicture:(id)sender {
     // Find out the current orientation and tell the still image output.
     AVCaptureConnection *stillImageConnection = [stillImageOutput connectionWithMediaType:AVMediaTypeVideo];
-    UIDeviceOrientation curDeviceOrientation = [[UIDevice currentDevice] orientation];
-    AVCaptureVideoOrientation avcaptureOrientation = [self avOrientationForDeviceOrientation:curDeviceOrientation];
+    AVCaptureVideoOrientation avcaptureOrientation = [self avOrientationForInterfaceOrientation:[[UIApplication sharedApplication] statusBarOrientation]];
     [stillImageConnection setVideoOrientation:avcaptureOrientation];
     [stillImageConnection setVideoScaleAndCropFactor:effectiveScale];
     
@@ -314,16 +369,6 @@ PixelPointRenderer *renderer;
     AVCaptureVideoDataOutput *output = videoDataOutput;
     NSDictionary* outputSettings = [output videoSettings];
     
-    //long width  = [[outputSettings objectForKey:@"Width"]  longValue];
-    //long height = [[outputSettings objectForKey:@"Height"] longValue];
-    
-    /*if (UIInterfaceOrientationIsPortrait((UIInterfaceOrientation)[[stillImageOutput connectionWithMediaType:AVMediaTypeVideo] videoOrientation]))
-    {
-        long buf = width;
-        width = height;
-        height = buf;
-    }*/
-    
     // Get a CMSampleBuffer's Core Video image buffer for the media data
     CVImageBufferRef imageBuffer = CMSampleBufferGetImageBuffer(sampleBuffer);
     
@@ -340,16 +385,18 @@ PixelPointRenderer *renderer;
     size_t width = CVPixelBufferGetWidth(imageBuffer);
     size_t height = CVPixelBufferGetHeight(imageBuffer);
     
-    //NSLog(@"w: %zu h: %zu bytesPerRow:%zu", width, height, bytesPerRow);
     [EAGLContext setCurrentContext: _glkView.context];
     
-    Image scaledImage = Image::scaledFromSource(baseAddress, width, height);
-    static int bRendered = false;
+    Image scaledImage = Image::scaledFromSource(baseAddress, width, height, 4, bytesPerRow);
+    renderer->loadTexture(scaledImage);
     
-    if (!bRendered)
+    if (UIInterfaceOrientationIsPortrait((UIInterfaceOrientation)[self avOrientationForInterfaceOrientation:[[UIApplication sharedApplication] statusBarOrientation]]))
     {
-        renderer->loadTexture(scaledImage);
-        bRendered = true;
+        imageSize = CGSizeMake(height, width);
+    }
+    else
+    {
+        imageSize = CGSizeMake(width, height);
     }
 
     // Unlock the pixel buffer
@@ -366,6 +413,21 @@ PixelPointRenderer *renderer;
     
     if (shouldPixelize)
     {
+        const CGSize viewSize = CGSizeMake(rect.size.width * [[UIScreen mainScreen] scale], rect.size.height * [[UIScreen mainScreen] scale]);
+        
+        CGSize viewportSize = imageSize;
+        if (imageSize.width > viewSize.width)
+        {
+            viewportSize.width = viewSize.width;
+            viewportSize.height = (viewSize.width / imageSize.width) * imageSize.height;
+        }
+        else if (imageSize.height > viewSize.height)
+        {
+            viewportSize.width = (viewSize.height / imageSize.height) * imageSize.width;
+            viewportSize.height = viewSize.height;
+        }
+        
+        glViewport((viewSize.width - viewportSize.width) / 2, (viewSize.height - viewportSize.height) / 2, viewportSize.width, viewportSize.height);
         renderer->render();
     }
     else

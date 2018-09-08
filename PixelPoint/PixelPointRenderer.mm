@@ -16,11 +16,12 @@ const GLchar* vertexSource = R"glsl(
 #version 300 es
 in vec2 position;
 in vec3 color;
+uniform mat2 transformation;
 out vec3 Color;
 void main()
 {
-    Color = color;
-    gl_Position = vec4(position, 0.0, 1.0);
+    Color = color.bgr;
+    gl_Position = vec4(transformation * position, 0.0, 1.0);
 }
 )glsl";
 
@@ -71,6 +72,8 @@ void tile (unsigned char *texture, int width, int height) {
     float elementWidth = 2.0f / width;
     float elementHeight = 2.0f / height;
     
+    Quad::clear();
+    
     for (int i = 0; i < width; i++)
     {
         for (int j = 0; j < height; j++)
@@ -98,8 +101,38 @@ std::vector<GLfloat> PixelPointRenderer::vertices;
 std::vector<GLuint> PixelPointRenderer::elements;
 
 PixelPointRenderer::PixelPointRenderer()
+:   viewport{0.0f, 0.0f, 0.0f, 0.0f},
+    rotation(0.0f),
+    flip{false, false},
+    scale {1.0f, 1.0f}
 {
+    // Create Vertex Array Object
+    glGenVertexArrays(1, &vao);
     
+    // Create a Vertex Buffer Object and copy the vertex data to it
+    glGenBuffers(1, &vbo);
+    
+    // Create an element array
+    glGenBuffers(1, &ebo);
+    
+    // Create and compile the vertex shader
+    GLuint vertexShader = glCreateShader(GL_VERTEX_SHADER);
+    glShaderSource(vertexShader, 1, &vertexSource, NULL);
+    glCompileShader(vertexShader);
+    
+    // Create and compile the fragment shader
+    GLuint fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
+    glShaderSource(fragmentShader, 1, &fragmentSource, NULL);
+    glCompileShader(fragmentShader);
+    
+    // Link the vertex and fragment shader into a shader program
+    shaderProgram = glCreateProgram();
+    glAttachShader(shaderProgram, vertexShader);
+    glAttachShader(shaderProgram, fragmentShader);
+    glLinkProgram(shaderProgram);
+    
+    posAttrib = glGetAttribLocation(shaderProgram, "position");
+    colAttrib = glGetAttribLocation(shaderProgram, "color");
 }
 
 PixelPointRenderer::~PixelPointRenderer()
@@ -113,14 +146,7 @@ void PixelPointRenderer::loadTexture(const Image &image)
     int width = image.width;
     int height = image.height;
     
-    // Create Vertex Array Object
-    GLuint vao;
-    glGenVertexArrays(1, &vao);
     glBindVertexArray(vao);
-    
-    // Create a Vertex Buffer Object and copy the vertex data to it
-    GLuint vbo;
-    glGenBuffers(1, &vbo);
     
     tile(texture, width, height);
     
@@ -130,10 +156,6 @@ void PixelPointRenderer::loadTexture(const Image &image)
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
     glBufferData(GL_ARRAY_BUFFER, vertexCount * sizeof(GLfloat), vertexData, GL_DYNAMIC_DRAW);
     
-    // Create an element array
-    GLuint ebo;
-    glGenBuffers(1, &ebo);
-    
     //elements = elementsForTiling(width, height);
     GLuint *elementData = elements.data();
     const size_t elementCount = elements.size();
@@ -141,31 +163,12 @@ void PixelPointRenderer::loadTexture(const Image &image)
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, elementCount * sizeof(GLuint), elementData, GL_STATIC_DRAW);
     
-    // Create and compile the vertex shader
-    GLuint vertexShader = glCreateShader(GL_VERTEX_SHADER);
-    glShaderSource(vertexShader, 1, &vertexSource, NULL);
-    glCompileShader(vertexShader);
-    
-    // Create and compile the fragment shader
-    GLuint fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
-    glShaderSource(fragmentShader, 1, &fragmentSource, NULL);
-    glCompileShader(fragmentShader);
-    
-    // Link the vertex and fragment shader into a shader program
-    GLuint shaderProgram = glCreateProgram();
-    glAttachShader(shaderProgram, vertexShader);
-    glAttachShader(shaderProgram, fragmentShader);
-    glLinkProgram(shaderProgram);
-    glUseProgram(shaderProgram);
-    
-    // Specify the layout of the vertex data
-    GLint posAttrib = glGetAttribLocation(shaderProgram, "position");
     glEnableVertexAttribArray(posAttrib);
     glVertexAttribPointer(posAttrib, 2, GL_FLOAT, GL_FALSE, COMPONENTS_PER_VERTEX * sizeof(GLfloat), 0);
     
-    GLint colAttrib = glGetAttribLocation(shaderProgram, "color");
     glEnableVertexAttribArray(colAttrib);
     glVertexAttribPointer(colAttrib, 3, GL_FLOAT, GL_FALSE, COMPONENTS_PER_VERTEX * sizeof(GLfloat), (void*)(2 * sizeof(GLfloat)));
+    
     
     //GLint texAttrib = glGetAttribLocation(shaderProgram, "texcoord");
     //glEnableVertexAttribArray(texAttrib);
@@ -184,10 +187,27 @@ void PixelPointRenderer::loadTexture(const Image &image)
     //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 }
 
+void PixelPointRenderer::clear()
+{
+    Quad::clear();
+}
+
 void PixelPointRenderer::render()
 {
-    // Clear the screen to white
-    glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+    glUseProgram(shaderProgram);
+    glBindVertexArray(vao);
+    
+    float xScale = flip[0] ? -1.0f : 1.0f;
+    float yScale = flip[1] ? -1.0f : 1.0f;
+    float flip [] = { xScale, 0, 0, yScale };
+    float rotate [] = { std::cos(rotation), -std::sin(rotation), sin(rotation), std::cos(rotation)};
+    float transform[] = {flip[0]*rotate[0] + flip[1]*rotate[2], flip[0]*rotate[1] + flip[1]*rotate[3], flip[2]*rotate[0] + flip[3]*rotate[2], flip[2]*rotate[1] + flip[3]*rotate[3]};
+    
+    GLuint transformID = glGetUniformLocation(shaderProgram, "transformation");
+    glUniformMatrix2fv(transformID, 1, GL_FALSE, &transform[0]);
+    
+    // Clear the screen to black
+    glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT);
     
     // Draw a rectangle from the 2 triangles using 6 indices

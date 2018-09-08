@@ -80,5 +80,12 @@ void Quad::setColorToBlack()
     printf("error %i", error);
 }
 
+void Quad::clear()
+{
+    quads.clear();
+    PixelPointRenderer::elements.clear();
+    PixelPointRenderer::vertices.clear();
+}
+
 std::vector<Quad> Quad::quads;
 

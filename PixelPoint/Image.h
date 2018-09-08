@@ -41,7 +41,7 @@ struct Image : public GenericImage<decltype(&std::free)>
     static Image loadImage(const char *filePath);
 #endif
     static Image scaledFromSource(const Image &original);
-    static Image scaledFromSource(unsigned char *image, int width, int height);
+    static Image scaledFromSource(unsigned char *image, int width, int height, int channels, int stride);
 };
 
 #endif /* Image_hpp */

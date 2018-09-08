@@ -40,6 +40,8 @@ struct Quad
         return lhs.vertexOffset == rhs.vertexOffset;
     }
     
+    static void clear();
+    
 private:
     size_t vertexOffset;
     size_t elementOffset;
