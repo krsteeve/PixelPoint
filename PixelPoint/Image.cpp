@@ -35,6 +35,12 @@ Image Image::scaledFromSource(const Image &original)
     int imageHeight = original.height;
     unsigned char *image = original.data.get();
     
+    return scaledFromSource(image, imageWidth, imageHeight);
+}
+
+
+Image Image::scaledFromSource(unsigned char *image, int imageWidth, int imageHeight)
+{
     // process the image
     int calculatedWidth = imageWidth, calculatedHeight = imageHeight;
     int numDivisions = 0;

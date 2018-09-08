@@ -12,8 +12,11 @@
 		308FC106213D854C00A90502 /* GLKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 308FC105213D854C00A90502 /* GLKit.framework */; };
 		308FC109213D875D00A90502 /* PixelPointRenderer.mm in Sources */ = {isa = PBXBuildFile; fileRef = 308FC107213D875C00A90502 /* PixelPointRenderer.mm */; };
 		308FC10F213DB84300A90502 /* Image.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 308FC10E213DB84300A90502 /* Image.cpp */; };
+		308FC113213DC54800A90502 /* AVFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 308FC112213DC54800A90502 /* AVFoundation.framework */; };
+		308FC115213DC56100A90502 /* AssetsLibrary.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 308FC114213DC56100A90502 /* AssetsLibrary.framework */; };
+		308FC117213DC58A00A90502 /* CoreMedia.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 308FC116213DC58A00A90502 /* CoreMedia.framework */; };
 		30FD74EC213B13E8001C67AC /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 30FD74EB213B13E8001C67AC /* AppDelegate.m */; };
-		30FD74EF213B13E8001C67AC /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 30FD74EE213B13E8001C67AC /* ViewController.m */; };
+		30FD74EF213B13E8001C67AC /* ViewController.mm in Sources */ = {isa = PBXBuildFile; fileRef = 30FD74EE213B13E8001C67AC /* ViewController.mm */; };
 		30FD74F2213B13E9001C67AC /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 30FD74F0213B13E9001C67AC /* Main.storyboard */; };
 		30FD74F4213B13E9001C67AC /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 30FD74F3213B13E9001C67AC /* Assets.xcassets */; };
 		30FD74F7213B13E9001C67AC /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 30FD74F5213B13E9001C67AC /* LaunchScreen.storyboard */; };
@@ -50,11 +53,14 @@
 		308FC10D213DB84300A90502 /* Image.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Image.h; path = ../../PixelPoint/Image.h; sourceTree = "<group>"; };
 		308FC10E213DB84300A90502 /* Image.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Image.cpp; path = ../../PixelPoint/Image.cpp; sourceTree = "<group>"; };
 		308FC110213DBBF300A90502 /* libSOIL.dylib */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libSOIL.dylib; path = ../SOIL/lib/libSOIL.dylib; sourceTree = "<group>"; };
+		308FC112213DC54800A90502 /* AVFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AVFoundation.framework; path = System/Library/Frameworks/AVFoundation.framework; sourceTree = SDKROOT; };
+		308FC114213DC56100A90502 /* AssetsLibrary.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AssetsLibrary.framework; path = System/Library/Frameworks/AssetsLibrary.framework; sourceTree = SDKROOT; };
+		308FC116213DC58A00A90502 /* CoreMedia.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreMedia.framework; path = System/Library/Frameworks/CoreMedia.framework; sourceTree = SDKROOT; };
 		30FD74E7213B13E8001C67AC /* PixelPoint-iPhone.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "PixelPoint-iPhone.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		30FD74EA213B13E8001C67AC /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
 		30FD74EB213B13E8001C67AC /* AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
 		30FD74ED213B13E8001C67AC /* ViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ViewController.h; sourceTree = "<group>"; };
-		30FD74EE213B13E8001C67AC /* ViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ViewController.m; sourceTree = "<group>"; };
+		30FD74EE213B13E8001C67AC /* ViewController.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = ViewController.mm; sourceTree = "<group>"; };
 		30FD74F1213B13E9001C67AC /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		30FD74F3213B13E9001C67AC /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		30FD74F6213B13E9001C67AC /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
@@ -73,6 +79,9 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				308FC117213DC58A00A90502 /* CoreMedia.framework in Frameworks */,
+				308FC115213DC56100A90502 /* AssetsLibrary.framework in Frameworks */,
+				308FC113213DC54800A90502 /* AVFoundation.framework in Frameworks */,
 				308FC106213D854C00A90502 /* GLKit.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -97,6 +106,9 @@
 		308FC104213D854C00A90502 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				308FC116213DC58A00A90502 /* CoreMedia.framework */,
+				308FC114213DC56100A90502 /* AssetsLibrary.framework */,
+				308FC112213DC54800A90502 /* AVFoundation.framework */,
 				308FC110213DBBF300A90502 /* libSOIL.dylib */,
 				308FC105213D854C00A90502 /* GLKit.framework */,
 			);
@@ -138,7 +150,7 @@
 				30FD74EA213B13E8001C67AC /* AppDelegate.h */,
 				30FD74EB213B13E8001C67AC /* AppDelegate.m */,
 				30FD74ED213B13E8001C67AC /* ViewController.h */,
-				30FD74EE213B13E8001C67AC /* ViewController.m */,
+				30FD74EE213B13E8001C67AC /* ViewController.mm */,
 				30FD74F0213B13E9001C67AC /* Main.storyboard */,
 				30FD74F3213B13E9001C67AC /* Assets.xcassets */,
 				30FD74F5213B13E9001C67AC /* LaunchScreen.storyboard */,
@@ -301,7 +313,7 @@
 			files = (
 				308FC109213D875D00A90502 /* PixelPointRenderer.mm in Sources */,
 				308FC102213D810800A90502 /* Quad.cpp in Sources */,
-				30FD74EF213B13E8001C67AC /* ViewController.m in Sources */,
+				30FD74EF213B13E8001C67AC /* ViewController.mm in Sources */,
 				308FC103213D810800A90502 /* Color.cpp in Sources */,
 				308FC10F213DB84300A90502 /* Image.cpp in Sources */,
 				30FD74FA213B13E9001C67AC /* main.m in Sources */,

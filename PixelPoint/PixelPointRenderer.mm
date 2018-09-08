@@ -11,6 +11,32 @@
 #include <vector>
 
 // Shader sources
+#if IOS
+const GLchar* vertexSource = R"glsl(
+#version 300 es
+in vec2 position;
+in vec3 color;
+out vec3 Color;
+void main()
+{
+    Color = color;
+    gl_Position = vec4(position, 0.0, 1.0);
+}
+)glsl";
+
+const GLchar* fragmentSource = R"glsl(
+#version 300 es
+precision highp float;
+in vec3 Color;
+out vec4 outColor;
+void main()
+{
+    outColor = vec4(Color, 1.0);
+}
+)glsl";
+
+#else
+
 const GLchar* vertexSource = R"glsl(
 #version 150 core
 in vec2 position;
@@ -32,6 +58,7 @@ void main()
     outColor = vec4(Color, 1.0);
 }
 )glsl";
+#endif
 
 static const int COMPONENTS_PER_VERTEX = 5;
 
@@ -164,5 +191,5 @@ void PixelPointRenderer::render()
     glClear(GL_COLOR_BUFFER_BIT);
     
     // Draw a rectangle from the 2 triangles using 6 indices
-    glDrawElements(GL_TRIANGLES, (int)vertices.size(), GL_UNSIGNED_INT, 0);
+    glDrawElements(GL_TRIANGLES, (int)elements.size(), GL_UNSIGNED_INT, 0);
 }

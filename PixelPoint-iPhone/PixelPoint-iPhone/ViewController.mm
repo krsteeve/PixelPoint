@@ -8,6 +8,8 @@
 
 #import "ViewController.h"
 
+#include "PixelPointRenderer.h"
+
 #import <CoreImage/CoreImage.h>
 #import <ImageIO/ImageIO.h>
 #import <AssertMacros.h>
@@ -19,6 +21,7 @@ static const NSString *AVCaptureStillImageIsCapturingStillImageContext = @"AVCap
 @interface ViewController ()
 @property (weak, nonatomic) IBOutlet UIView *previewView;
 @property (weak, nonatomic) IBOutlet UISegmentedControl *camerasControl;
+@property (weak, nonatomic) IBOutlet GLKView *glkView;
 
 
 
@@ -36,22 +39,45 @@ BOOL isUsingFrontFacingCamera;
 CIDetector *faceDetector;
 CGFloat beginGestureScale;
 CGFloat effectiveScale;
+PixelPointRenderer *renderer;
 
 
 - (void)viewDidLoad {
     [super viewDidLoad];
     // Do any additional setup after loading the view, typically from a nib.
     [self setupAVCapture];
+    
+    renderer = new PixelPointRenderer();
+    
+    [_glkView setContext:[[EAGLContext alloc] initWithAPI:kEAGLRenderingAPIOpenGLES3]];
+    [_glkView setNeedsDisplay];
+    [_glkView setOpaque:NO];
+    [_glkView setUserInteractionEnabled:NO];
 }
 
 - (IBAction)pixelize:(id)sender {
     shouldPixelize = [(UISwitch *)sender isOn];
     [[videoDataOutput connectionWithMediaType:AVMediaTypeVideo] setEnabled:shouldPixelize];
+    [_glkView setNeedsDisplay];
 }
 
 - (void)didReceiveMemoryWarning {
     [super didReceiveMemoryWarning];
     // Dispose of any resources that can be recreated.
+}
+
+- (void)viewDidLayoutSubviews
+{
+    // get the new orientation from device
+    AVCaptureVideoOrientation newOrientation = [self avOrientationForDeviceOrientation:[[UIDevice currentDevice] orientation]];
+    
+    // set the orientation of preview layer :( which will be displayed in the device )
+    [previewLayer.connection setVideoOrientation:newOrientation];
+    
+    // set the orientation of the connection: which will take care of capture
+    [[stillImageOutput connectionWithMediaType:AVMediaTypeVideo] setVideoOrientation:newOrientation];
+    
+    [previewLayer setFrame:_previewView.bounds];
 }
 
 - (void)setupAVCapture
@@ -75,7 +101,7 @@ CGFloat effectiveScale;
         
         // Make a still image output
         stillImageOutput = [AVCaptureStillImageOutput new];
-        [stillImageOutput addObserver:self forKeyPath:@"capturingStillImage" options:NSKeyValueObservingOptionNew context:[AVCaptureStillImageIsCapturingStillImageContext UTF8String]];
+        [stillImageOutput addObserver:self forKeyPath:@"capturingStillImage" options:NSKeyValueObservingOptionNew context:(void *)[AVCaptureStillImageIsCapturingStillImageContext UTF8String]];
         if ( [session canAddOutput:stillImageOutput] )
             [session addOutput:stillImageOutput];
         
@@ -103,8 +129,9 @@ CGFloat effectiveScale;
         [previewLayer setBackgroundColor:[[UIColor blackColor] CGColor]];
         [previewLayer setVideoGravity:AVLayerVideoGravityResizeAspect];
         CALayer *rootLayer = [_previewView layer];
-        [rootLayer setMasksToBounds:YES];
-        [previewLayer setFrame:[rootLayer bounds]];
+        //[rootLayer setMasksToBounds:YES];
+        [previewLayer setFrame:_previewView.bounds];
+        [previewLayer setNeedsDisplayOnBoundsChange:YES];
         [rootLayer addSublayer:previewLayer];
         [session startRunning];
     }
@@ -190,7 +217,7 @@ CGFloat effectiveScale;
 // utility routing used during image capture to set up capture orientation
 - (AVCaptureVideoOrientation)avOrientationForDeviceOrientation:(UIDeviceOrientation)deviceOrientation
 {
-    AVCaptureVideoOrientation result = deviceOrientation;
+    AVCaptureVideoOrientation result = (AVCaptureVideoOrientation)deviceOrientation;
     if ( deviceOrientation == UIDeviceOrientationLandscapeLeft )
         result = AVCaptureVideoOrientationLandscapeRight;
     else if ( deviceOrientation == UIDeviceOrientationLandscapeRight )
@@ -281,7 +308,71 @@ CGFloat effectiveScale;
 
 - (void)captureOutput:(AVCaptureOutput *)captureOutput didOutputSampleBuffer:(CMSampleBufferRef)sampleBuffer fromConnection:(AVCaptureConnection *)connection
 {
-    NSLog(@"Got frame!");
+    //NSLog(@"Got frame!");
+    // need to get an Image out of this data
+    //downscale it and pass it to the renderer
+    AVCaptureVideoDataOutput *output = videoDataOutput;
+    NSDictionary* outputSettings = [output videoSettings];
+    
+    //long width  = [[outputSettings objectForKey:@"Width"]  longValue];
+    //long height = [[outputSettings objectForKey:@"Height"] longValue];
+    
+    /*if (UIInterfaceOrientationIsPortrait((UIInterfaceOrientation)[[stillImageOutput connectionWithMediaType:AVMediaTypeVideo] videoOrientation]))
+    {
+        long buf = width;
+        width = height;
+        height = buf;
+    }*/
+    
+    // Get a CMSampleBuffer's Core Video image buffer for the media data
+    CVImageBufferRef imageBuffer = CMSampleBufferGetImageBuffer(sampleBuffer);
+    
+    // Lock the base address of the pixel buffer
+    CVPixelBufferLockBaseAddress(imageBuffer, 0);
+    
+    // Get the number of bytes per row for the pixel buffer
+    unsigned char *baseAddress = (unsigned char *)CVPixelBufferGetBaseAddress(imageBuffer);
+    
+    // Get the number of bytes per row for the pixel buffer
+    size_t bytesPerRow = CVPixelBufferGetBytesPerRow(imageBuffer);
+    
+    // Get the pixel buffer width and height
+    size_t width = CVPixelBufferGetWidth(imageBuffer);
+    size_t height = CVPixelBufferGetHeight(imageBuffer);
+    
+    //NSLog(@"w: %zu h: %zu bytesPerRow:%zu", width, height, bytesPerRow);
+    [EAGLContext setCurrentContext: _glkView.context];
+    
+    Image scaledImage = Image::scaledFromSource(baseAddress, width, height);
+    static int bRendered = false;
+    
+    if (!bRendered)
+    {
+        renderer->loadTexture(scaledImage);
+        bRendered = true;
+    }
+
+    // Unlock the pixel buffer
+    CVPixelBufferUnlockBaseAddress(imageBuffer,0);
+    
+    dispatch_async(dispatch_get_main_queue(), ^(void) {
+        [_glkView setNeedsDisplay];
+    });
+}
+
+- (void)glkView:(GLKView *)view drawInRect:(CGRect)rect
+{
+    [EAGLContext setCurrentContext: _glkView.context];
+    
+    if (shouldPixelize)
+    {
+        renderer->render();
+    }
+    else
+    {
+        glClearColor(0.0, 0.0, 0.0, 0.0);
+        glClear(GL_COLOR_BUFFER_BIT);
+    }
 }
 
 @end
