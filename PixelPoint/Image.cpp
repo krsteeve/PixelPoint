@@ -85,7 +85,7 @@ Image Image::scaledFromSourceHelper(unsigned char *image, size_t width, size_t h
                 {
                     for (long y = 0; y < sizeToAverage; y++)
                     {
-                        long innerPos = (j * sizeToAverage + y) * (resultWidth * sizeToAverage) + ((i * sizeToAverage) + x) * outChannels;
+                        long innerPos = (j * sizeToAverage + y) * (resultWidth * sizeToAverage * outChannels) + ((i * sizeToAverage) + x) * outChannels;
                         resultImage[innerPos] = average.red;
                         resultImage[innerPos + 1] = average.green;
                         resultImage[innerPos + 2] = average.blue;
@@ -123,5 +123,5 @@ Image Image::scaledFromSource(unsigned char *image, size_t width, size_t height,
 
 Image Image::scaledFromSourceForSaving(unsigned char *image, size_t width, size_t height, int channels, int outChannels, size_t stride)
 {
-    return scaledFromSourceHelper(image, width, height, channels, outChannels, stride, false);
+    return scaledFromSourceHelper(image, width, height, channels, outChannels, stride, true);
 }
