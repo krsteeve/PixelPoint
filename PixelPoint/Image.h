@@ -15,24 +15,25 @@
 template <typename deleter>
 struct GenericImage
 {
-    GenericImage(std::unique_ptr<unsigned char, deleter> data, int width, int height)
-    : data(std::move(data)), width(width), height(height) {}
+    GenericImage(std::unique_ptr<unsigned char, deleter> data, size_t width, size_t height, int channels)
+    : data(std::move(data)), width(width), height(height), channels(channels) {}
     
     std::unique_ptr<unsigned char, deleter> data;
-    const int width;
-    const int height;
+    const size_t width;
+    const size_t height;
+    const int channels;
 };
 
 struct Image : public GenericImage<decltype(&std::free)>
 {
-    Image(std::unique_ptr<unsigned char, decltype(&std::free)> data, int width, int height)
-    : GenericImage(std::move(data), width, height)
+    Image(std::unique_ptr<unsigned char, decltype(&std::free)> data, size_t width, size_t height, int channels)
+    : GenericImage(std::move(data), width, height, channels)
     {
         
     }
     
     Image(Image &&other)
-    : GenericImage(std::move(other.data), other.width, other.height)
+    : GenericImage(std::move(other.data), other.width, other.height, other.channels)
     {
         
     }
@@ -41,7 +42,13 @@ struct Image : public GenericImage<decltype(&std::free)>
     static Image loadImage(const char *filePath);
 #endif
     static Image scaledFromSource(const Image &original);
-    static Image scaledFromSource(unsigned char *image, int width, int height, int channels, int stride);
+    static Image scaledFromSource(unsigned char *image, size_t width, size_t height, int channels, size_t stride);
+    
+    // scales the image down and back up for saving to disk. out channels can be used to pad RGB to RGBA but the A isn't written to
+    static Image scaledFromSourceForSaving(unsigned char *image, size_t width, size_t height, int channels, int outChannels, size_t stride);
+    
+private:
+    static Image scaledFromSourceHelper(unsigned char *image, size_t width, size_t height, int channels, int outChannels, size_t stride, bool scaleUp);
 };
 
 #endif /* Image_hpp */

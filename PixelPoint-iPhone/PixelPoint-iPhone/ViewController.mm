@@ -41,6 +41,7 @@ CGFloat beginGestureScale;
 CGFloat effectiveScale;
 PixelPointRenderer *renderer;
 CGSize imageSize;
+AVCaptureDevice *device;
 
 
 - (void)viewDidLoad {
@@ -69,62 +70,25 @@ CGSize imageSize;
     // Dispose of any resources that can be recreated.
 }
 
-- (void)reorientOutput: (AVCaptureVideoOrientation) newOrientation {
-    switch (newOrientation) {
-        case UIDeviceOrientationPortraitUpsideDown:  // Device oriented vertically, home button on the top
-            //exifOrientation = PHOTOS_EXIF_0ROW_LEFT_0COL_BOTTOM;
-            break;
-        case UIDeviceOrientationLandscapeLeft:       // Device oriented horizontally, home button on the right
-            if (isUsingFrontFacingCamera)
-            {
-                renderer->rotation = M_PI;
-                renderer->flip[0] = true;
-                renderer->flip[1] = false;
-            }
-            else
-            {
-                renderer->rotation = 0.0f;
-                renderer->flip[0] = false;
-                renderer->flip[1] = false;
-            }
-            break;
-        case UIDeviceOrientationLandscapeRight:      // Device oriented horizontally, home button on the left
-            if (isUsingFrontFacingCamera)
-            {
-                renderer->rotation = M_PI;
-                renderer->flip[0] = false;
-                renderer->flip[1] = true;
-            }
-            else
-            {
-                renderer->rotation = M_PI;
-                renderer->flip[0] = false;
-                renderer->flip[1] = false;
-            }
-            break;
-        case UIDeviceOrientationPortrait:            // Device oriented vertically, home button on the bottom
-            if (isUsingFrontFacingCamera)
-            {
-                renderer->rotation = -M_PI / 2.0f;
-                renderer->flip[0] = true;
-                renderer->flip[1] = false;
-            }
-            else
-            {
-                renderer->rotation = M_PI / 2.0f;
-                renderer->flip[0] = false;
-                renderer->flip[1] = false;
-            }
-            break;
-        default:
-            break;
+- (void)reorientOutput {
+    if (isUsingFrontFacingCamera)
+    {
+        renderer->rotation = -M_PI / 2.0f;
+        renderer->flip[0] = true;
+        renderer->flip[1] = false;
+    }
+    else
+    {
+        renderer->rotation = M_PI / 2.0f;
+        renderer->flip[0] = false;
+        renderer->flip[1] = false;
     }
 }
 
 - (void)viewDidLayoutSubviews
 {
     // get the new orientation from device
-    AVCaptureVideoOrientation newOrientation = [self avOrientationForInterfaceOrientation:[[UIApplication sharedApplication] statusBarOrientation]];
+    AVCaptureVideoOrientation newOrientation = (AVCaptureVideoOrientation)[[UIApplication sharedApplication] statusBarOrientation];
     
     // set the orientation of preview layer :( which will be displayed in the device )
     [previewLayer.connection setVideoOrientation:newOrientation];
@@ -134,7 +98,7 @@ CGSize imageSize;
     
     [previewLayer setFrame:_previewView.bounds];
     
-    [self reorientOutput:newOrientation];
+    [self reorientOutput];
 }
 
 - (void)setupAVCapture
@@ -145,7 +109,7 @@ CGSize imageSize;
     [session setSessionPreset:AVCaptureSessionPresetPhoto];
     
     // Select a video device, make an input
-    AVCaptureDevice *device = [AVCaptureDevice defaultDeviceWithMediaType:AVMediaTypeVideo];
+    device = [AVCaptureDevice defaultDeviceWithMediaType:AVMediaTypeVideo];
     AVCaptureDeviceInput *deviceInput = [AVCaptureDeviceInput deviceInputWithDevice:device error:&error];
     
     if (error == nil)
@@ -186,7 +150,7 @@ CGSize imageSize;
         [previewLayer setBackgroundColor:[[UIColor blackColor] CGColor]];
         [previewLayer setVideoGravity:AVLayerVideoGravityResizeAspect];
         CALayer *rootLayer = [_previewView layer];
-        //[rootLayer setMasksToBounds:YES];
+        [rootLayer setMasksToBounds:YES];
         [previewLayer setFrame:_previewView.bounds];
         [previewLayer setNeedsDisplayOnBoundsChange:YES];
         [rootLayer addSublayer:previewLayer];
@@ -242,8 +206,7 @@ CGSize imageSize;
     }
     isUsingFrontFacingCamera = !isUsingFrontFacingCamera;
     
-    AVCaptureVideoOrientation orientation = [self avOrientationForInterfaceOrientation:[[UIApplication sharedApplication] statusBarOrientation]];
-    [self reorientOutput:orientation];
+    [self reorientOutput];
 }
 
 // scale image depending on users pinch gesture
@@ -267,17 +230,32 @@ CGSize imageSize;
         CGFloat maxScaleAndCropFactor = [[stillImageOutput connectionWithMediaType:AVMediaTypeVideo] videoMaxScaleAndCropFactor];
         if (effectiveScale > maxScaleAndCropFactor)
             effectiveScale = maxScaleAndCropFactor;
-        [CATransaction begin];
+        /*[CATransaction begin];
         [CATransaction setAnimationDuration:.025];
         [previewLayer setAffineTransform:CGAffineTransformMakeScale(effectiveScale, effectiveScale)];
-        [CATransaction commit];
+        [CATransaction commit];*/
+        NSError *error = nil;
+        if ([device lockForConfiguration:&error])
+        {
+            device.videoZoomFactor = effectiveScale;
+            
+            [device unlockForConfiguration];
+        }
+        else
+        {
+            NSLog(@"%@", error);
+        }
     }
 }
 
 // utility routing used during image capture to set up capture orientation
-- (AVCaptureVideoOrientation)avOrientationForInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation
+- (AVCaptureVideoOrientation)avOrientationForDeviceOrientation:(UIDeviceOrientation)deviceOrientation
 {
-    AVCaptureVideoOrientation result = (AVCaptureVideoOrientation)interfaceOrientation;
+    AVCaptureVideoOrientation result = (AVCaptureVideoOrientation)deviceOrientation;
+    if ( deviceOrientation == UIDeviceOrientationLandscapeLeft )
+        result = AVCaptureVideoOrientationLandscapeRight;
+    else if ( deviceOrientation == UIDeviceOrientationLandscapeRight )
+        result = AVCaptureVideoOrientationLandscapeLeft;
     return result;
 }
 
@@ -297,12 +275,12 @@ CGSize imageSize;
 - (IBAction)takePicture:(id)sender {
     // Find out the current orientation and tell the still image output.
     AVCaptureConnection *stillImageConnection = [stillImageOutput connectionWithMediaType:AVMediaTypeVideo];
-    AVCaptureVideoOrientation avcaptureOrientation = [self avOrientationForInterfaceOrientation:[[UIApplication sharedApplication] statusBarOrientation]];
+    UIDeviceOrientation curDeviceOrientation = [[UIDevice currentDevice] orientation];
+    AVCaptureVideoOrientation avcaptureOrientation = [self avOrientationForDeviceOrientation:curDeviceOrientation];
     [stillImageConnection setVideoOrientation:avcaptureOrientation];
-    [stillImageConnection setVideoScaleAndCropFactor:effectiveScale];
     
-    [stillImageOutput setOutputSettings:[NSDictionary dictionaryWithObject:AVVideoCodecJPEG
-                                                                    forKey:AVVideoCodecKey]];
+    NSDictionary *outputSettings = [[NSDictionary alloc] initWithObjectsAndKeys:[NSNumber numberWithUnsignedInt:kCVPixelFormatType_32BGRA], kCVPixelBufferPixelFormatTypeKey, nil];
+    [stillImageOutput setOutputSettings:outputSettings];
     
     [stillImageOutput captureStillImageAsynchronouslyFromConnection:stillImageConnection
                                                   completionHandler:^(CMSampleBufferRef imageDataSampleBuffer, NSError *error) {
@@ -311,19 +289,89 @@ CGSize imageSize;
                                                       }
                                                       else {
                                                           // trivial simple JPEG case
-                                                          NSData *jpegData = [AVCaptureStillImageOutput jpegStillImageNSDataRepresentation:imageDataSampleBuffer];
                                                           CFDictionaryRef attachments = CMCopyDictionaryOfAttachments(kCFAllocatorDefault,
                                                                                                                       imageDataSampleBuffer,
                                                                                                                       kCMAttachmentMode_ShouldPropagate);
                                                           ALAssetsLibrary *library = [[ALAssetsLibrary alloc] init];
-                                                          [library writeImageDataToSavedPhotosAlbum:jpegData metadata:(__bridge NSDictionary*)attachments completionBlock:^(NSURL *assetURL, NSError *error) {
-                                                              if (error) {
-                                                                  [self displayErrorOnMainQueue:error withMessage:@"Save to camera roll failed"];
-                                                              }
-                                                          }];
+                                                          
+                                                          // Get a CMSampleBuffer's Core Video image buffer for the media data
+                                                          CVImageBufferRef imageBuffer = CMSampleBufferGetImageBuffer(imageDataSampleBuffer);
+                                                          
+                                                          // Lock the base address of the pixel buffer
+                                                          CVPixelBufferLockBaseAddress(imageBuffer, 0);
+                                                          
+                                                          // Get the number of bytes per row for the pixel buffer
+                                                          unsigned char *baseAddress = (unsigned char *)CVPixelBufferGetBaseAddress(imageBuffer);
+                                                          
+                                                          // Get the number of bytes per row for the pixel buffer
+                                                          size_t bytesPerRow = CVPixelBufferGetBytesPerRow(imageBuffer);
+                                                          
+                                                          // Get the pixel buffer width and height
+                                                          size_t width = CVPixelBufferGetWidth(imageBuffer);
+                                                          size_t height = CVPixelBufferGetHeight(imageBuffer);
+                                                          
+                                                          // save the regular jpeg
+                                                          {
+                                                              CGColorSpaceRef colorSpace = CGColorSpaceCreateDeviceRGB();
+                                                              
+                                                              // Create a bitmap graphics context with the sample buffer data
+                                                              CGContextRef context = CGBitmapContextCreate(baseAddress, width, height, 8, bytesPerRow, colorSpace, kCGBitmapByteOrder32Little | kCGImageAlphaPremultipliedFirst);
+                                                              // Create a Quartz image from the pixel data in the bitmap graphics context
+                                                              CGImageRef quartzImage = CGBitmapContextCreateImage(context);
+                                                              
+                                                              // Free up the context and color space
+                                                              CGContextRelease(context);
+                                                              CGColorSpaceRelease(colorSpace);
+                                                              
+                                                              // Create an image object from the Quartz image
+                                                              UIImage *image = [UIImage imageWithCGImage:quartzImage];
+                                                              NSData *jpegData = UIImageJPEGRepresentation(image, 0.9f);
+                                                              
+                                                              [library writeImageDataToSavedPhotosAlbum:jpegData metadata:(__bridge NSDictionary*)attachments completionBlock:^(NSURL *assetURL, NSError *error) {
+                                                                  if (error) {
+                                                                      [self displayErrorOnMainQueue:error withMessage:@"Save to camera roll failed"];
+                                                                  }
+                                                              }];
+                                                              
+                                                              // Release the Quartz image
+                                                              CGImageRelease(quartzImage);
+                                                          }
+                                                          
+                                                          if (shouldPixelize) {
+                                                              
+                                                              Image scaledImage = Image::scaledFromSourceForSaving(baseAddress, width, height, 4, 4, bytesPerRow);
+                                                              
+                                                              CGColorSpaceRef colorSpace = CGColorSpaceCreateDeviceRGB();
+                                                              
+                                                              // Create a bitmap graphics context with the sample buffer data
+                                                              CGContextRef context = CGBitmapContextCreate(scaledImage.data.get(), scaledImage.width, scaledImage.height, 8, scaledImage.width * 4, colorSpace, kCGBitmapByteOrder32Little | kCGImageAlphaPremultipliedFirst);
+                                                              // Create a Quartz image from the pixel data in the bitmap graphics context
+                                                              CGImageRef quartzImage = CGBitmapContextCreateImage(context);
+                                                              
+                                                              // Free up the context and color space
+                                                              CGContextRelease(context);
+                                                              CGColorSpaceRelease(colorSpace);
+                                                              
+                                                              // Create an image object from the Quartz image
+                                                              UIImage *image = [UIImage imageWithCGImage:quartzImage];
+                                                              NSData *pngData = UIImagePNGRepresentation(image);
+                                                              [library writeImageDataToSavedPhotosAlbum:pngData metadata:(__bridge NSDictionary*)attachments completionBlock:^(NSURL *assetURL, NSError *error) {
+                                                                  if (error) {
+                                                                      [self displayErrorOnMainQueue:error withMessage:@"Save to camera roll failed"];
+                                                                  }
+                                                              }];
+                                                              
+                                                              // Release the Quartz image
+                                                              CGImageRelease(quartzImage);
+                                                          }
+
+                                                          // Unlock the pixel buffer
+                                                          CVPixelBufferUnlockBaseAddress(imageBuffer,0);
                                                           
                                                           if (attachments)
+                                                          {
                                                               CFRelease(attachments);
+                                                          }
                                                       }
                                                   }];
 }
@@ -363,12 +411,6 @@ CGSize imageSize;
 
 - (void)captureOutput:(AVCaptureOutput *)captureOutput didOutputSampleBuffer:(CMSampleBufferRef)sampleBuffer fromConnection:(AVCaptureConnection *)connection
 {
-    //NSLog(@"Got frame!");
-    // need to get an Image out of this data
-    //downscale it and pass it to the renderer
-    AVCaptureVideoDataOutput *output = videoDataOutput;
-    NSDictionary* outputSettings = [output videoSettings];
-    
     // Get a CMSampleBuffer's Core Video image buffer for the media data
     CVImageBufferRef imageBuffer = CMSampleBufferGetImageBuffer(sampleBuffer);
     
@@ -390,14 +432,7 @@ CGSize imageSize;
     Image scaledImage = Image::scaledFromSource(baseAddress, width, height, 4, bytesPerRow);
     renderer->loadTexture(scaledImage);
     
-    if (UIInterfaceOrientationIsPortrait((UIInterfaceOrientation)[self avOrientationForInterfaceOrientation:[[UIApplication sharedApplication] statusBarOrientation]]))
-    {
-        imageSize = CGSizeMake(height, width);
-    }
-    else
-    {
-        imageSize = CGSizeMake(width, height);
-    }
+    imageSize = CGSizeMake(height, width);
 
     // Unlock the pixel buffer
     CVPixelBufferUnlockBaseAddress(imageBuffer,0);
@@ -411,10 +446,10 @@ CGSize imageSize;
 {
     [EAGLContext setCurrentContext: _glkView.context];
     
+    const CGSize viewSize = CGSizeMake(rect.size.width * [[UIScreen mainScreen] scale], rect.size.height * [[UIScreen mainScreen] scale]);
+    
     if (shouldPixelize)
     {
-        const CGSize viewSize = CGSizeMake(rect.size.width * [[UIScreen mainScreen] scale], rect.size.height * [[UIScreen mainScreen] scale]);
-        
         CGSize viewportSize = imageSize;
         if (imageSize.width > viewSize.width)
         {
