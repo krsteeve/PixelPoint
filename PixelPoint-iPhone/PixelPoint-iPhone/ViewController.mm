@@ -325,6 +325,7 @@ AVCaptureDevice *device;
                                                               
                                                               // Create an image object from the Quartz image
                                                               UIImage *image = [UIImage imageWithCGImage:quartzImage];
+                                                              // saving as jpeg handles the image orientation already
                                                               NSData *jpegData = UIImageJPEGRepresentation(image, 0.9f);
                                                               
                                                               [library writeImageDataToSavedPhotosAlbum:jpegData metadata:(__bridge NSDictionary*)attachments completionBlock:^(NSURL *assetURL, NSError *error) {
@@ -354,7 +355,9 @@ AVCaptureDevice *device;
                                                               
                                                               // Create an image object from the Quartz image
                                                               UIImage *image = [UIImage imageWithCGImage:quartzImage];
-                                                              NSData *pngData = UIImagePNGRepresentation(image);
+                                                              
+                                                              // with png we need to manually rotate the image. use jpeg with 0 compression instead
+                                                              NSData *pngData = UIImageJPEGRepresentation(image, 1.0f);
                                                               [library writeImageDataToSavedPhotosAlbum:pngData metadata:(__bridge NSDictionary*)attachments completionBlock:^(NSURL *assetURL, NSError *error) {
                                                                   if (error) {
                                                                       [self displayErrorOnMainQueue:error withMessage:@"Save to camera roll failed"];
